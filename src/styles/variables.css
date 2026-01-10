@@ -1,0 +1,151 @@
+:root {
+  /* =====================================
+     TYPOGRAPHY
+     ===================================== */
+  --font-heading: 'Fredoka One', cursive;
+  --font-body: 'Nunito', sans-serif;
+
+  /* Font Sizes */
+  --text-xs: 0.75rem;    /* 12px */
+  --text-sm: 0.875rem;   /* 14px */
+  --text-base: 1rem;     /* 16px */
+  --text-lg: 1.125rem;   /* 18px */
+  --text-xl: 1.25rem;    /* 20px */
+  --text-2xl: 1.5rem;    /* 24px */
+  --text-3xl: 1.875rem;  /* 30px */
+  --text-4xl: 2.25rem;   /* 36px */
+  --text-5xl: 3rem;      /* 48px */
+
+  /* =====================================
+     SPACING (8px base unit)
+     ===================================== */
+  --space-1: 0.5rem;   /* 8px */
+  --space-2: 1rem;     /* 16px */
+  --space-3: 1.5rem;   /* 24px */
+  --space-4: 2rem;     /* 32px */
+  --space-5: 2.5rem;   /* 40px */
+  --space-6: 3rem;     /* 48px */
+  --space-8: 4rem;     /* 64px */
+
+  /* =====================================
+     SIZING
+     ===================================== */
+  --tile-size: 40px;
+  --char-size: 36px;
+  --touch-target: 44px;
+  --game-max-width: 480px;
+  --game-max-height: 900px;
+
+  /* =====================================
+     COLORS - GLOBAL UI
+     ===================================== */
+  --color-white: #FFFFFF;
+  --color-black: #000000;
+  --text-primary: #2D3436;
+  --text-light: #F9F9F9;
+  --text-muted: #636e72;
+
+  /* Glass Effects */
+  --glass-bg: rgba(255, 255, 255, 0.15);
+  --glass-bg-strong: rgba(255, 255, 255, 0.25);
+  --glass-border: rgba(255, 255, 255, 0.3);
+  --glass-blur: 12px;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.16);
+  --shadow-xl: 0 12px 48px rgba(0, 0, 0, 0.24);
+
+  /* Semantic Colors */
+  --color-success: #00b894;
+  --color-warning: #fdcb6e;
+  --color-danger: #ff7675;
+  --color-info: #74b9ff;
+
+  /* =====================================
+     WORLD 1: CRYSTAL CAVERNS
+     Deep underground, glowing crystals
+     ===================================== */
+  --w1-bg-dark: #1A1A2E;
+  --w1-bg-medium: #16213E;
+  --w1-primary: #0F3460;
+  --w1-accent: #00FFF5;
+  --w1-accent-dim: rgba(0, 255, 245, 0.3);
+  --w1-gem-gradient: linear-gradient(135deg, #E94560 0%, #a21a32 100%);
+  --w1-text: #F9F9F9;
+
+  /* =====================================
+     WORLD 2: SKYLINE CITY
+     Sunset/golden hour rooftop vibes
+     ===================================== */
+  --w2-sky-gradient: linear-gradient(to top, #6C5B7B, #C06C84, #F67280, #F8B195);
+  --w2-platform: rgba(255, 255, 255, 0.85);
+  --w2-accent: #FFD700;
+  --w2-char: #6A0572;
+  --w2-text: #2D3436;
+
+  /* =====================================
+     WORLD 3: NEON RUSH
+     Dark cyberpunk with neon highlights
+     ===================================== */
+  --w3-bg: #050505;
+  --w3-grid: #1F1F1F;
+  --w3-primary: #00F0FF;
+  --w3-accent: #FF0099;
+  --w3-tertiary: #FFFF00;
+  --w3-trail: rgba(0, 240, 255, 0.4);
+  --w3-text: #FFFFFF;
+
+  /* =====================================
+     WORLD 4: ENCHANTED GARDEN
+     Soft nature tones, magical sparkles
+     ===================================== */
+  --w4-bg-gradient: linear-gradient(to bottom, #588157, #3A5A40);
+  --w4-panel: rgba(255, 255, 255, 0.2);
+  --w4-primary: #A3B18A;
+  --w4-accent: #DAD7CD;
+  --w4-flower-pink: #FFB5A7;
+  --w4-flower-purple: #C8B6FF;
+  --w4-flower-yellow: #FFE66D;
+  --w4-text: #2D3436;
+
+  /* =====================================
+     Z-INDEX LAYERS
+     ===================================== */
+  --z-background: 0;
+  --z-game-world: 10;
+  --z-game-entities: 20;
+  --z-ui-overlay: 30;
+  --z-modal: 40;
+  --z-toast: 50;
+
+  /* =====================================
+     TRANSITIONS & TIMING
+     ===================================== */
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+  --transition-slow: 400ms ease;
+  --transition-slowest: 600ms ease;
+
+  /* Custom Easing Functions */
+  --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-in-out-circ: cubic-bezier(0.85, 0, 0.15, 1);
+  --ease-spring: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  /* =====================================
+     BORDER RADIUS
+     ===================================== */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+}
+
+/* Dark Mode Support (future enhancement) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Already dark by default, but allows customization */
+  }
+}
