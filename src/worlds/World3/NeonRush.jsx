@@ -1,23 +1,29 @@
 import React from 'react';
 import { WORLD3_LEVELS } from './levels';
 import { useSnakeLogic } from './useSnakeLogic';
-import { useGameState } from '../../engine/GameStateProvider';
-import Pulse from '../../components/characters/Pulse';
+import { useGameState } from '../../engine/useGameState';
+import { Pause, Diamond, Zap, Star, Target } from 'lucide-react';
+
+// Kenney rolling ball sprites
+const PLAYER_SPRITE = '/assets/kenney/world3/player.png';
+const ORB_SPRITE = '/assets/kenney/world3/orb.png';
 
 const NeonRush = ({ levelId }) => {
-  const { completeLevel, failLevel, setShowPauseMenu } = useGameState();
+  const { completeLevel, failLevel, setShowPauseMenu, playSound } = useGameState();
   const levelData = WORLD3_LEVELS.find(l => l.id === levelId);
-  const { trail, orbs, barriers, finishPos, score, speed } = useSnakeLogic(levelData, completeLevel, failLevel);
+  const { trail, orbs, barriers, finishPos, score, speed, countdown } = useSnakeLogic(levelData, completeLevel, failLevel, playSound);
 
   return (
     <div className="absolute-fill" style={{ background: 'var(--w3-bg)', overflow: 'hidden' }}>
       <div className="absolute-fill" style={{ backgroundImage: 'linear-gradient(0deg, var(--w3-grid) 1px, transparent 1px), linear-gradient(90deg, var(--w3-grid) 1px, transparent 1px)', backgroundSize: '40px 40px', opacity: 0.3 }} />
       <div className="absolute top-0 left-0 right-0 flex-between p-4" style={{ zIndex: 'var(--z-ui-overlay)' }}>
-        <button className="btn-icon" onClick={() => setShowPauseMenu(true)}>⏸</button>
-        <div className="glass-panel flex gap-3 px-4 py-2">
-          <span className="text-body">💎 {orbs.length}</span>
-          <span className="text-body">⚡ {speed.toFixed(1)}x</span>
-          <span className="text-body">⭐ {score}</span>
+        <button className="btn-icon flex-center" onClick={() => setShowPauseMenu(true)} style={{ width: '44px', height: '44px' }}>
+          <Pause size={22} color="var(--text-light)" />
+        </button>
+        <div className="glass-panel flex gap-4 px-4 py-2 items-center">
+          <span className="flex items-center gap-1 text-body"><Diamond size={16} color="var(--w3-accent)" /> {orbs.length}</span>
+          <span className="flex items-center gap-1 text-body"><Zap size={16} color="var(--w3-tertiary)" /> {speed.toFixed(1)}x</span>
+          <span className="flex items-center gap-1 text-body"><Star size={16} fill="#FFD700" color="#FFD700" /> {score}</span>
         </div>
         <div style={{ width: '44px' }} />
       </div>
@@ -26,10 +32,10 @@ const NeonRush = ({ levelId }) => {
           <div key={`barrier-${i}`} className="absolute" style={{ left: barrier.x, top: barrier.y, width: barrier.width, height: barrier.height, background: 'var(--w3-primary)', boxShadow: '0 0 20px var(--w3-primary)', border: '2px solid var(--w3-primary)' }} />
         ))}
         {orbs.map((orb) => (
-          <div key={orb.id} className="absolute anim-pulse" style={{ left: orb.x - 8, top: orb.y - 8, width: 16, height: 16, borderRadius: '50%', background: 'var(--w3-accent)', boxShadow: '0 0 15px var(--w3-accent)' }} />
+          <img key={orb.id} src={ORB_SPRITE} alt="Orb" className="absolute anim-pulse" style={{ left: orb.x - 10, top: orb.y - 10, width: 20, height: 20, imageRendering: 'pixelated', filter: 'drop-shadow(0 0 10px var(--w3-accent))' }} />
         ))}
-        <div className="absolute anim-glow" style={{ left: finishPos.x - 25, top: finishPos.y - 25, width: 50, height: 50, borderRadius: '50%', border: '3px solid var(--w3-tertiary)', background: 'rgba(255, 255, 0, 0.1)', boxShadow: '0 0 30px var(--w3-tertiary)' }}>
-          <div className="absolute-fill flex-center text-2xl">🎯</div>
+        <div className="absolute anim-glow flex-center" style={{ left: finishPos.x - 25, top: finishPos.y - 25, width: 50, height: 50, borderRadius: '50%', border: '3px solid var(--w3-tertiary)', background: 'rgba(255, 255, 0, 0.1)', boxShadow: '0 0 30px var(--w3-tertiary)' }}>
+          <Target size={28} color="var(--w3-tertiary)" />
         </div>
         {trail.map((segment, i) => {
           const opacity = 1 - (i / trail.length) * 0.7;
@@ -37,12 +43,56 @@ const NeonRush = ({ levelId }) => {
           return <div key={i} className="absolute" style={{ left: segment.x - size / 2, top: segment.y - size / 2, width: size, height: size, borderRadius: '50%', background: 'var(--w3-primary)', opacity, boxShadow: `0 0 ${10 * opacity}px var(--w3-primary)`, pointerEvents: 'none' }} />;
         })}
         {trail.length > 0 && (
-          <div className="absolute" style={{ left: trail[0].x - 12, top: trail[0].y - 12, width: 24, height: 24 }}>
-            <Pulse speed={speed} />
-          </div>
+          <img
+            src={PLAYER_SPRITE}
+            alt="Player"
+            className="absolute"
+            style={{
+              left: trail[0].x - 14,
+              top: trail[0].y - 14,
+              width: 28,
+              height: 28,
+              imageRendering: 'pixelated',
+              filter: `drop-shadow(0 0 ${10 + speed * 2}px var(--w3-primary))`,
+            }}
+          />
         )}
       </div>
+
+      {/* Countdown overlay */}
+      {countdown !== null && countdown > 0 && (
+        <div
+          className="absolute-fill flex-center"
+          style={{
+            background: 'rgba(0, 0, 0, 0.7)',
+            zIndex: 'var(--z-modal)',
+          }}
+        >
+          <div
+            key={countdown}
+            style={{
+              fontSize: '120px',
+              fontWeight: 800,
+              color: 'var(--w3-primary)',
+              textShadow: '0 0 40px var(--w3-primary), 0 0 80px var(--w3-primary)',
+              animation: 'countdownPulse 1s ease-out',
+            }}
+          >
+            {countdown}
+          </div>
+        </div>
+      )}
+
       <p className="absolute bottom-8 left-0 right-0 text-small text-center opacity-50" style={{ color: 'var(--w3-text)' }}>Swipe or arrow keys to change direction</p>
+
+      {/* Countdown animation */}
+      <style>{`
+        @keyframes countdownPulse {
+          0% { transform: scale(0.5); opacity: 0; }
+          20% { transform: scale(1.2); opacity: 1; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+      `}</style>
     </div>
   );
 };

@@ -2,152 +2,104 @@ import React from 'react';
 
 /**
  * Gem Character - World 1 (Crystal Caverns)
- * A cute diamond-shaped character with expressive eyes
+ * A cute crystal/gem character with expressive eyes
+ * SVG-based for crisp rendering at any size
  */
-const Gem = ({ mood = 'idle', size = 36, color = 'var(--w1-gem-gradient)' }) => {
+const Gem = ({ mood = 'idle', size = 36 }) => {
   // Eye styles based on mood
-  const getEyeStyle = () => {
+  const getEyeHeight = () => {
     switch (mood) {
-      case 'happy':
-        return { scaleY: 0.3, translateY: 1 }; // Squished happy eyes
-      case 'worried':
-        return { scaleY: 1.2, translateY: -2 }; // Wide worried eyes
-      case 'idle':
-      default:
-        return { scaleY: 1, translateY: 0 };
+      case 'happy': return 3; // Squished happy eyes
+      case 'worried': return 10; // Wide worried eyes
+      default: return 6;
     }
   };
 
-  const eyeStyle = getEyeStyle();
+  const eyeHeight = getEyeHeight();
 
   return (
-    <div
-      className="relative flex-center"
-      style={{
-        width: size,
-        height: size,
-      }}
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 48 48"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ filter: 'drop-shadow(0 4px 8px rgba(233, 69, 96, 0.4))' }}
     >
-      {/* Diamond body - rotated square */}
-      <div
-        style={{
-          width: size * 0.8,
-          height: size * 0.8,
-          background: color,
-          transform: 'rotate(45deg)',
-          borderRadius: '4px',
-          boxShadow: `
-            0 4px 12px rgba(233, 69, 96, 0.4),
-            inset 0 -4px 8px rgba(0, 0, 0, 0.2),
-            inset 0 4px 8px rgba(255, 255, 255, 0.3)
-          `,
-          position: 'relative',
-        }}
-      >
-        {/* Inner shine */}
-        <div
-          style={{
-            position: 'absolute',
-            top: '15%',
-            left: '15%',
-            width: '30%',
-            height: '30%',
-            background: 'rgba(255, 255, 255, 0.5)',
-            borderRadius: '2px',
-          }}
+      {/* Crystal body */}
+      <defs>
+        <linearGradient id="gemGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#FF6B9D" />
+          <stop offset="50%" stopColor="#E94560" />
+          <stop offset="100%" stopColor="#C73E54" />
+        </linearGradient>
+        <linearGradient id="gemShine" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="rgba(255,255,255,0.6)" />
+          <stop offset="100%" stopColor="rgba(255,255,255,0)" />
+        </linearGradient>
+      </defs>
+
+      {/* Main crystal shape */}
+      <path
+        d="M24 4 L44 24 L24 44 L4 24 Z"
+        fill="url(#gemGradient)"
+        stroke="#FF8FAB"
+        strokeWidth="1"
+      />
+
+      {/* Inner highlight facet */}
+      <path
+        d="M24 8 L38 24 L24 40 L10 24 Z"
+        fill="none"
+        stroke="rgba(255,255,255,0.3)"
+        strokeWidth="1"
+      />
+
+      {/* Top shine */}
+      <path
+        d="M12 16 L18 10 L24 16 L18 22 Z"
+        fill="url(#gemShine)"
+      />
+
+      {/* Eyes */}
+      <ellipse cx="18" cy="22" rx="3" ry={eyeHeight / 2} fill="#2D3436">
+        <animate
+          attributeName="ry"
+          values={`${eyeHeight / 2};${eyeHeight / 4};${eyeHeight / 2}`}
+          dur="3s"
+          repeatCount="indefinite"
         />
-      </div>
+      </ellipse>
+      <ellipse cx="30" cy="22" rx="3" ry={eyeHeight / 2} fill="#2D3436">
+        <animate
+          attributeName="ry"
+          values={`${eyeHeight / 2};${eyeHeight / 4};${eyeHeight / 2}`}
+          dur="3s"
+          repeatCount="indefinite"
+        />
+      </ellipse>
 
-      {/* Face container (not rotated) */}
-      <div
-        className="absolute flex-center"
-        style={{
-          top: '30%',
-          left: '50%',
-          transform: 'translateX(-50%)',
-        }}
-      >
-        {/* Eyes */}
-        <div className="flex gap-1">
-          {/* Left eye */}
-          <div
-            style={{
-              width: 6,
-              height: 8,
-              background: '#2D3436',
-              borderRadius: '50%',
-              transform: `scaleY(${eyeStyle.scaleY}) translateY(${eyeStyle.translateY}px)`,
-              transition: 'transform 150ms ease',
-            }}
-          >
-            {/* Eye shine */}
-            <div
-              style={{
-                width: 2,
-                height: 2,
-                background: '#fff',
-                borderRadius: '50%',
-                position: 'relative',
-                top: 1,
-                left: 1,
-              }}
-            />
-          </div>
+      {/* Eye shines */}
+      <circle cx="16" cy="20" r="1.5" fill="white" />
+      <circle cx="28" cy="20" r="1.5" fill="white" />
 
-          {/* Right eye */}
-          <div
-            style={{
-              width: 6,
-              height: 8,
-              background: '#2D3436',
-              borderRadius: '50%',
-              transform: `scaleY(${eyeStyle.scaleY}) translateY(${eyeStyle.translateY}px)`,
-              transition: 'transform 150ms ease',
-            }}
-          >
-            <div
-              style={{
-                width: 2,
-                height: 2,
-                background: '#fff',
-                borderRadius: '50%',
-                position: 'relative',
-                top: 1,
-                left: 1,
-              }}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Blush (only when happy) */}
+      {/* Blush (when happy) */}
       {mood === 'happy' && (
         <>
-          <div
-            className="absolute"
-            style={{
-              top: '50%',
-              left: '10%',
-              width: 6,
-              height: 4,
-              background: 'rgba(255, 150, 150, 0.6)',
-              borderRadius: '50%',
-            }}
-          />
-          <div
-            className="absolute"
-            style={{
-              top: '50%',
-              right: '10%',
-              width: 6,
-              height: 4,
-              background: 'rgba(255, 150, 150, 0.6)',
-              borderRadius: '50%',
-            }}
-          />
+          <ellipse cx="12" cy="26" rx="4" ry="2" fill="rgba(255, 150, 150, 0.5)" />
+          <ellipse cx="36" cy="26" rx="4" ry="2" fill="rgba(255, 150, 150, 0.5)" />
         </>
       )}
-    </div>
+
+      {/* Small smile */}
+      <path
+        d={mood === 'happy' ? "M20 28 Q24 32 28 28" : mood === 'worried' ? "M20 30 Q24 28 28 30" : "M21 29 Q24 30 27 29"}
+        stroke="#2D3436"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        fill="none"
+      />
+    </svg>
   );
 };
 

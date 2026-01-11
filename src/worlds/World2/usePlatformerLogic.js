@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { PHYSICS } from '../../utils/constants';
 import { useCollision } from '../../engine/useCollision';
 
@@ -6,7 +6,7 @@ import { useCollision } from '../../engine/useCollision';
  * Custom hook for platformer game logic in World 2
  * Handles physics, jumping, platform collision, star collection
  */
-export const usePlatformerLogic = (levelData, onComplete, onFail) => {
+export const usePlatformerLogic = (levelData, onComplete, onFail, playSound = () => {}) => {
   const [player, setPlayer] = useState({
     x: levelData.startPos.x,
     y: levelData.startPos.y,
@@ -29,14 +29,28 @@ export const usePlatformerLogic = (levelData, onComplete, onFail) => {
   const [stars, setStars] = useState(() =>
     levelData.stars.map(s => ({ ...s }))
   );
+  const initialStarCount = levelData.stars.length;
+  const starsRef = useRef(stars);
 
   const [score, setScore] = useState(0);
   const [gameState, setGameState] = useState('playing');
 
   const keysRef = useRef({ left: false, right: false });
   const previousYRef = useRef(player.y);
+  const groundedRef = useRef(player.grounded);
+  const playerRef = useRef(player);
 
   const { checkPlatformCollision } = useCollision();
+
+  // Keep refs in sync via useEffect (not during render)
+  useEffect(() => {
+    starsRef.current = stars;
+  }, [stars]);
+
+  useEffect(() => {
+    groundedRef.current = player.grounded;
+    playerRef.current = player;
+  }, [player]);
 
   // Keyboard input
   useEffect(() => {
@@ -45,6 +59,7 @@ export const usePlatformerLogic = (levelData, onComplete, onFail) => {
       if (e.code === 'ArrowRight' || e.code === 'KeyD') keysRef.current.right = true;
       if ((e.code === 'ArrowUp' || e.code === 'KeyW' || e.code === 'Space') && player.grounded) {
         setPlayer(prev => ({ ...prev, vy: PHYSICS.JUMP_STRENGTH, grounded: false }));
+        playSound('jump');
       }
     };
 
@@ -60,7 +75,7 @@ export const usePlatformerLogic = (levelData, onComplete, onFail) => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [player.grounded]);
+  }, [player.grounded, playSound]);
 
   // Touch controls
   useEffect(() => {
@@ -70,9 +85,10 @@ export const usePlatformerLogic = (levelData, onComplete, onFail) => {
       const touch = e.touches[0];
       touchStartX = touch.clientX;
 
-      // Tap to jump
-      if (player.grounded) {
+      // Tap to jump - use ref to get current grounded state
+      if (groundedRef.current) {
         setPlayer(prev => ({ ...prev, vy: PHYSICS.JUMP_STRENGTH, grounded: false }));
+        playSound('jump');
       }
     };
 
@@ -101,7 +117,7 @@ export const usePlatformerLogic = (levelData, onComplete, onFail) => {
       window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [player.grounded]);
+  }, [playSound]); // groundedRef is used instead of player.grounded
 
   // Game loop
   useEffect(() => {
@@ -139,8 +155,30 @@ export const usePlatformerLogic = (levelData, onComplete, onFail) => {
         // Fell off screen
         if (newPlayer.y > 900) {
           setGameState('failed');
+          playSound('fail');
           onFail();
           return prev;
+        }
+
+        // Update ref synchronously for star collision
+        playerRef.current = newPlayer;
+
+        // Star collision - check and update stars inline
+        const currentStars = starsRef.current;
+        const newStars = currentStars.filter(star => {
+          const dx = star.x - (newPlayer.x + newPlayer.width / 2);
+          const dy = star.y - (newPlayer.y + newPlayer.height / 2);
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          if (distance < 30) {
+            setScore(prevScore => prevScore + 100);
+            playSound('collect');
+            return false;
+          }
+          return true;
+        });
+        if (newStars.length !== currentStars.length) {
+          starsRef.current = newStars;
+          setStars(newStars);
         }
 
         // Platform collision
@@ -164,7 +202,9 @@ export const usePlatformerLogic = (levelData, onComplete, onFail) => {
             // Check finish
             if (platform.type === 'finish') {
               setGameState('complete');
-              const collectedCount = levelData.stars.length - stars.length;
+              playSound('complete');
+              // Use ref to get current stars count for accurate calculation
+              const collectedCount = initialStarCount - starsRef.current.length;
               const starRating = collectedCount >= 3 ? 3 : collectedCount >= 2 ? 2 : 1;
               onComplete(score + collectedCount * 100, starRating);
             }
@@ -172,23 +212,6 @@ export const usePlatformerLogic = (levelData, onComplete, onFail) => {
         });
 
         return newPlayer;
-      });
-
-      // FIX: Star collision - filter by id instead of index
-      setStars(prevStars => {
-        const remaining = prevStars.filter(star => {
-          const dx = star.x - (player.x + player.width / 2);
-          const dy = star.y - (player.y + player.height / 2);
-          const distance = Math.sqrt(dx * dx + dy * dy);
-
-          if (distance < 30) {
-            setScore(prev => prev + 100);
-            return false; // Remove this star
-          }
-          return true;
-        });
-
-        return remaining;
       });
 
       // Move platforms
@@ -218,7 +241,7 @@ export const usePlatformerLogic = (levelData, onComplete, onFail) => {
     return () => {
       if (frameId) cancelAnimationFrame(frameId);
     };
-  }, [gameState, platforms, stars, score, player, levelData, checkPlatformCollision, onComplete, onFail]);
+  }, [gameState, platforms, stars, score, player, levelData, checkPlatformCollision, onComplete, onFail, playSound, initialStarCount]);
 
   return {
     player,

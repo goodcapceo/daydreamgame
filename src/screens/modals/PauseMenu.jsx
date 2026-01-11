@@ -1,5 +1,5 @@
 import React from 'react';
-import { useGameState } from '../../engine/GameStateProvider';
+import { useGameState } from '../../engine/useGameState';
 
 const ToggleButton = ({ label, icon, enabled, onChange }) => (
   <button className={`glass-panel flex-between p-4 transition-all ${enabled ? 'border-green-400' : 'opacity-60'}`} onClick={onChange} style={{ width: '100%' }}>
