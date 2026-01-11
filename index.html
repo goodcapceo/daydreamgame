@@ -2,7 +2,8 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" href="/favicon.ico" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="theme-color" content="#1A1A2E" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -18,6 +19,7 @@
     <meta property="og:image" content="https://playdaydreamgame.com/og-image.svg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:type" content="image/svg+xml" />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Daydream" />
@@ -29,9 +31,47 @@
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
 
     <link rel="manifest" href="/manifest.json" />
+
+    <!-- Loading spinner styles (removed when React mounts) -->
+    <style>
+      #loading-spinner {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(180deg, #0a0a1a 0%, #1a1a3a 50%, #0d1b2a 100%);
+        z-index: 9999;
+      }
+      #loading-spinner .spinner {
+        width: 48px;
+        height: 48px;
+        border: 4px solid rgba(0, 255, 245, 0.2);
+        border-top-color: #00FFF5;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      #loading-spinner .text {
+        margin-top: 16px;
+        color: rgba(255, 255, 255, 0.7);
+        font-family: 'Nunito', sans-serif;
+        font-size: 14px;
+        letter-spacing: 2px;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Loading spinner shown while React loads -->
+      <div id="loading-spinner">
+        <div class="spinner"></div>
+        <div class="text">LOADING</div>
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
