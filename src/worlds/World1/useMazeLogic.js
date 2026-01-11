@@ -8,10 +8,10 @@ const TILE_SIZE = 40;
  * Custom hook for maze game logic in World 1
  * Handles player movement, crystal collection, hazard avoidance
  */
-export const useMazeLogic = (levelData, onComplete, onFail) => {
+export const useMazeLogic = (levelData, onComplete, onFail, playSound = () => {}) => {
   const [playerPos, setPlayerPos] = useState(levelData.startPos);
-  const [crystals, setCrystals] = useState(() => {
-    // Extract crystal positions from grid
+  // Extract initial crystals from grid and store count
+  const initialCrystals = (() => {
     const found = [];
     levelData.grid.forEach((row, y) => {
       row.forEach((cell, x) => {
@@ -21,12 +21,19 @@ export const useMazeLogic = (levelData, onComplete, onFail) => {
       });
     });
     return found;
-  });
+  })();
+  const initialCrystalCount = initialCrystals.length;
+
+  const [crystals, setCrystals] = useState(initialCrystals);
 
   const [score, setScore] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(levelData.timeLimit);
   const [gameState, setGameState] = useState('playing');
   const [mood, setMood] = useState('idle');
+  const [trail, setTrail] = useState([levelData.startPos]); // Track movement trail
+
+  // Track which timer warnings have been played
+  const playedWarnings = useRef({ ten: false, five: false, three: false, two: false, one: false });
 
   // Hazard positions (moving dark patches)
   const [hazards, setHazards] = useState(() =>
@@ -65,20 +72,30 @@ export const useMazeLogic = (levelData, onComplete, onFail) => {
 
     setPlayerPos(newPos);
 
+    // Update trail (keep last 8 positions for visual effect)
+    setTrail(prev => {
+      const newTrail = [...prev, newPos];
+      return newTrail.slice(-8);
+    });
+
     // Check crystal collection - FIX: filter by reference/id instead of index
     const collectedCrystal = crystals.find(c => c.x === newPos.x && c.y === newPos.y);
     if (collectedCrystal) {
       setCrystals(prev => prev.filter(c => c.id !== collectedCrystal.id));
       setScore(prev => prev + 100);
       setMood('happy');
+      playSound('collect');
       setTimeout(() => setMood('idle'), 500);
     }
 
     // Check exit
     if (levelData.grid[newPos.y][newPos.x] === TILES.EXIT) {
-      const collectedCount = levelData.crystalsRequired - crystals.length + (collectedCrystal ? 1 : 0);
+      // Calculate how many crystals have been collected (including the one just collected this move)
+      const remainingCrystals = crystals.length - (collectedCrystal ? 1 : 0);
+      const collectedCount = initialCrystalCount - remainingCrystals;
       if (collectedCount >= levelData.crystalsRequired) {
         setGameState('complete');
+        playSound('complete');
         const stars =
           timeRemaining > levelData.timeLimit * 0.7 ? 3 :
           timeRemaining > levelData.timeLimit * 0.4 ? 2 : 1;
@@ -92,9 +109,10 @@ export const useMazeLogic = (levelData, onComplete, onFail) => {
     );
     if (hitHazard || levelData.grid[newPos.y][newPos.x] === TILES.DARK_PATCH) {
       setGameState('failed');
+      playSound('fail');
       onFail();
     }
-  }, [playerPos, crystals, hazards, score, timeRemaining, gameState, levelData, checkGridCollision, onComplete, onFail]);
+  }, [playerPos, crystals, hazards, score, timeRemaining, gameState, levelData, checkGridCollision, onComplete, onFail, playSound, initialCrystalCount]);
 
   // Keyboard input
   useEffect(() => {
@@ -167,6 +185,39 @@ export const useMazeLogic = (levelData, onComplete, onFail) => {
     return () => clearInterval(timer);
   }, [gameState, onFail]);
 
+  // Timer urgency sounds - escalating warnings as time runs low
+  useEffect(() => {
+    if (gameState !== 'playing') return;
+
+    // 10 seconds warning - gentle alert
+    if (timeRemaining === 10 && !playedWarnings.current.ten) {
+      playedWarnings.current.ten = true;
+      playSound('warning');
+    }
+
+    // 5 seconds warning - more urgent
+    if (timeRemaining === 5 && !playedWarnings.current.five) {
+      playedWarnings.current.five = true;
+      playSound('warning');
+    }
+
+    // Final 3 seconds - rapid ticking
+    if (timeRemaining === 3 && !playedWarnings.current.three) {
+      playedWarnings.current.three = true;
+      playSound('tick');
+    }
+
+    if (timeRemaining === 2 && !playedWarnings.current.two) {
+      playedWarnings.current.two = true;
+      playSound('tick');
+    }
+
+    if (timeRemaining === 1 && !playedWarnings.current.one) {
+      playedWarnings.current.one = true;
+      playSound('tick');
+    }
+  }, [timeRemaining, gameState, playSound]);
+
   // Hazard movement (using requestAnimationFrame for smoother updates)
   useEffect(() => {
     if (gameState !== 'playing' || hazards.length === 0) return;
@@ -217,20 +268,19 @@ export const useMazeLogic = (levelData, onComplete, onFail) => {
     };
   }, [gameState, hazards.length]);
 
-  // Update mood based on nearby hazards
-  useEffect(() => {
+  // Calculate mood based on nearby hazards (derived state, no effect needed)
+  const calculatedMood = (() => {
+    // Don't override 'happy' mood (set after collecting crystal)
+    if (mood === 'happy') return mood;
+
     const nearbyHazards = getEntitiesInRadius(
       { x: playerPos.x * TILE_SIZE, y: playerPos.y * TILE_SIZE },
       hazards.map(h => ({ x: h.currentX * TILE_SIZE, y: h.currentY * TILE_SIZE })),
       TILE_SIZE * 2
     );
 
-    if (nearbyHazards.length > 0 && mood !== 'happy') {
-      setMood('worried');
-    } else if (mood === 'worried') {
-      setMood('idle');
-    }
-  }, [playerPos, hazards, mood, getEntitiesInRadius]);
+    return nearbyHazards.length > 0 ? 'worried' : 'idle';
+  })();
 
   return {
     playerPos,
@@ -239,7 +289,8 @@ export const useMazeLogic = (levelData, onComplete, onFail) => {
     score,
     timeRemaining,
     gameState,
-    mood,
+    mood: calculatedMood,
+    trail,
     movePlayer,
     grid: levelData.grid,
     tileSize: TILE_SIZE,

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useGameState } from '../../engine/GameStateProvider';
+import { useGameState } from '../../engine/useGameState';
 
 const LevelFailed = () => {
   const { retryLevel, navigateTo, selectedWorld } = useGameState();

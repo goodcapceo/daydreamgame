@@ -165,28 +165,30 @@ export const resetProgress = () => {
 };
 
 /**
+ * Get default settings
+ */
+const getDefaultSettings = () => ({
+  muted: false,
+  musicVolume: 0.7,
+  sfxVolume: 0.8,
+  haptics: true,
+  reducedMotion: false,
+});
+
+/**
  * Load settings
  */
 export const loadSettings = () => {
   try {
     const saved = localStorage.getItem(STORAGE_KEYS.SETTINGS);
     if (!saved) {
-      return {
-        soundEnabled: true,
-        musicEnabled: true,
-        hapticsEnabled: true,
-        reducedMotion: false,
-      };
+      return getDefaultSettings();
     }
-    return JSON.parse(saved);
+    // Merge with defaults to handle missing fields
+    return { ...getDefaultSettings(), ...JSON.parse(saved) };
   } catch (error) {
     console.error('Error loading settings:', error);
-    return {
-      soundEnabled: true,
-      musicEnabled: true,
-      hapticsEnabled: true,
-      reducedMotion: false,
-    };
+    return getDefaultSettings();
   }
 };
 

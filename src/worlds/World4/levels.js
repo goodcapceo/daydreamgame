@@ -22,14 +22,15 @@ export const generateGrid = (rows, cols, tileTypes) => {
     for (let col = 0; col < cols; col++) {
       let tile;
       let attempts = 0;
-      do {
+      let hasMatch = true;
+      while (hasMatch && attempts <= 50) {
         tile = tileTypes[Math.floor(Math.random() * tileTypes.length)];
         attempts++;
-        if (attempts > 50) { tile = tileTypes[0]; break; }
         const horizontalMatch = col >= 2 && grid[row][col - 1] === tile && grid[row][col - 2] === tile;
         const verticalMatch = row >= 2 && grid[row - 1][col] === tile && grid[row - 2][col] === tile;
-        if (!horizontalMatch && !verticalMatch) break;
-      } while (true);
+        hasMatch = horizontalMatch || verticalMatch;
+      }
+      if (attempts > 50) { tile = tileTypes[0]; }
       grid[row][col] = tile;
     }
   }

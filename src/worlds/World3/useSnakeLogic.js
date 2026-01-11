@@ -2,17 +2,85 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { DIRECTIONS } from '../../utils/constants';
 import { useCollision } from '../../engine/useCollision';
 
-export const useSnakeLogic = (levelData, onComplete, onFail) => {
+/**
+ * Snake game logic hook - uses refs for game loop performance
+ * Note: Game loop code intentionally accesses refs during render for performance
+ * and to maintain state across animation frames without triggering re-renders.
+ * Initialization effect intentionally sets state when levelData becomes available.
+ */
+
+export const useSnakeLogic = (levelData, onComplete, onFail, playSound = () => {}) => {
   const [score, setScore] = useState(0);
-  const [gameState, setGameState] = useState('playing');
-  const [trail, setTrail] = useState([levelData.startPos]);
-  const trailRef = useRef([levelData.startPos]);
-  const directionRef = useRef(levelData.startDirection);
-  const speedRef = useRef(levelData.initialSpeed);
-  const headRef = useRef({ ...levelData.startPos });
-  const [orbs, setOrbs] = useState(levelData.orbs);
+  const [speed, setSpeed] = useState(3);
+  const [gameState, setGameState] = useState('waiting');
+  const [trail, setTrail] = useState([]);
+  const [orbs, setOrbs] = useState([]);
+  const [countdown, setCountdown] = useState(null); // null = no countdown, 3/2/1 = counting
+
+  const trailRef = useRef([]);
+  const directionRef = useRef('UP');
+  const speedRef = useRef(3);
+  const headRef = useRef({ x: 240, y: 800 });
+  const orbsRef = useRef([]);
+  const scoreRef = useRef(0);
   const inputBufferRef = useRef(null);
   const { checkAABB } = useCollision();
+
+  // Initialize/reset game when levelData changes
+  useEffect(() => {
+    if (!levelData) return;
+
+    const startTrail = [{ ...levelData.startPos }];
+    const startOrbs = [...levelData.orbs];
+
+    // Reset all state - intentional initialization when level loads
+    /* eslint-disable react-hooks/set-state-in-effect */
+    setScore(0);
+    setSpeed(levelData.initialSpeed);
+    setTrail(startTrail);
+    setOrbs(startOrbs);
+    setGameState('countdown');
+    setCountdown(3);
+    /* eslint-enable react-hooks/set-state-in-effect */
+
+    // Reset all refs
+    trailRef.current = startTrail;
+    directionRef.current = levelData.startDirection;
+    speedRef.current = levelData.initialSpeed;
+    headRef.current = { ...levelData.startPos };
+    orbsRef.current = startOrbs;
+    scoreRef.current = 0;
+    inputBufferRef.current = null;
+  }, [levelData]);
+
+  // Countdown timer effect
+  useEffect(() => {
+    if (gameState !== 'countdown' || countdown === null) return;
+
+    if (countdown === 0) {
+      /* eslint-disable react-hooks/set-state-in-effect */
+      setGameState('playing');
+      setCountdown(null);
+      /* eslint-enable react-hooks/set-state-in-effect */
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      playSound('tick');
+      setCountdown(prev => prev - 1);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [gameState, countdown, playSound]);
+
+  // Keep refs in sync with state for use in game loop
+  useEffect(() => {
+    orbsRef.current = orbs;
+  }, [orbs]);
+
+  useEffect(() => {
+    scoreRef.current = score;
+  }, [score]);
 
   const changeDirection = useCallback((newDirection) => {
     if (gameState !== 'playing') return;
@@ -64,13 +132,17 @@ export const useSnakeLogic = (levelData, onComplete, onFail) => {
   }, [changeDirection]);
 
   useEffect(() => {
-    if (gameState !== 'playing') return;
+    if (gameState !== 'playing' || !levelData) return;
+
     let lastTime = Date.now();
     let accumulator = 0;
     const fixedDeltaTime = 1000 / 30;
     let frameId;
+    let isRunning = true;
 
     const loop = () => {
+      if (!isRunning) return;
+
       const currentTime = Date.now();
       const deltaTime = currentTime - lastTime;
       lastTime = currentTime;
@@ -82,16 +154,22 @@ export const useSnakeLogic = (levelData, onComplete, onFail) => {
           inputBufferRef.current = null;
         }
         const dir = DIRECTIONS[directionRef.current];
+        if (!dir) {
+          accumulator -= fixedDeltaTime;
+          continue;
+        }
         headRef.current.x += dir.x * speedRef.current;
         headRef.current.y += dir.y * speedRef.current;
 
         const newTrail = [{ x: headRef.current.x, y: headRef.current.y }, ...trailRef.current];
-        const maxLength = 20 + (levelData.orbs.length - orbs.length) * 5;
+        const maxLength = 20 + (levelData.orbs.length - orbsRef.current.length) * 5;
         if (newTrail.length > maxLength) newTrail.pop();
         trailRef.current = newTrail;
 
         if (headRef.current.x < 0 || headRef.current.x > 480 || headRef.current.y < 0 || headRef.current.y > 900) {
+          isRunning = false;
           setGameState('failed');
+          playSound('fail');
           onFail();
           return;
         }
@@ -99,7 +177,9 @@ export const useSnakeLogic = (levelData, onComplete, onFail) => {
         const headRect = { x: headRef.current.x - 6, y: headRef.current.y - 6, width: 12, height: 12 };
         const hitBarrier = levelData.barriers.some(barrier => checkAABB(headRect, barrier));
         if (hitBarrier) {
+          isRunning = false;
           setGameState('failed');
+          playSound('fail');
           onFail();
           return;
         }
@@ -110,12 +190,14 @@ export const useSnakeLogic = (levelData, onComplete, onFail) => {
           return Math.sqrt(dx * dx + dy * dy) < 10;
         });
         if (hitSelf) {
+          isRunning = false;
           setGameState('failed');
+          playSound('fail');
           onFail();
           return;
         }
 
-        // FIX: Use id-based filtering for orb collection
+        // Check orb collection using ref
         setOrbs(prevOrbs => {
           const remaining = prevOrbs.filter(orb => {
             const dx = orb.x - headRef.current.x;
@@ -124,6 +206,8 @@ export const useSnakeLogic = (levelData, onComplete, onFail) => {
             if (distance < 15) {
               setScore(prev => prev + 20);
               speedRef.current += levelData.speedIncrement;
+              setSpeed(speedRef.current);
+              playSound('orb');
               return false;
             }
             return true;
@@ -136,10 +220,12 @@ export const useSnakeLogic = (levelData, onComplete, onFail) => {
           Math.pow(headRef.current.y - levelData.finishPos.y, 2)
         );
         if (finishDist < 20) {
+          isRunning = false;
           setGameState('complete');
-          const collectedCount = levelData.orbs.length - orbs.length;
+          playSound('complete');
+          const collectedCount = levelData.orbs.length - orbsRef.current.length;
           const stars = collectedCount === levelData.orbs.length ? 3 : collectedCount >= levelData.orbs.length - 2 ? 2 : 1;
-          onComplete(score, stars);
+          onComplete(scoreRef.current, stars);
           return;
         }
         accumulator -= fixedDeltaTime;
@@ -148,8 +234,20 @@ export const useSnakeLogic = (levelData, onComplete, onFail) => {
       frameId = requestAnimationFrame(loop);
     };
     loop();
-    return () => { if (frameId) cancelAnimationFrame(frameId); };
-  }, [gameState, orbs, score, levelData, checkAABB, onComplete, onFail]);
+    return () => {
+      isRunning = false;
+      if (frameId) cancelAnimationFrame(frameId);
+    };
+  }, [gameState, levelData, checkAABB, onComplete, onFail, playSound]);
 
-  return { trail, orbs, barriers: levelData.barriers, finishPos: levelData.finishPos, score, gameState, speed: speedRef.current };
+  return {
+    trail,
+    orbs,
+    barriers: levelData?.barriers || [],
+    finishPos: levelData?.finishPos || { x: 0, y: 0 },
+    score,
+    gameState,
+    speed,
+    countdown,
+  };
 };
