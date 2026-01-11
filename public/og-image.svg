@@ -1,0 +1,157 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Background gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1A1A2E"/>
+      <stop offset="100%" style="stop-color:#16213E"/>
+    </linearGradient>
+
+    <!-- World 1: Crystal Caverns - Cyan glow -->
+    <radialGradient id="world1">
+      <stop offset="0%" style="stop-color:#00FFF5;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#00FFF5;stop-opacity:0"/>
+    </radialGradient>
+
+    <!-- World 2: Skyline City - Sunset orange -->
+    <radialGradient id="world2">
+      <stop offset="0%" style="stop-color:#F67280;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#F8B195;stop-opacity:0"/>
+    </radialGradient>
+
+    <!-- World 3: Neon Rush - Pink -->
+    <radialGradient id="world3">
+      <stop offset="0%" style="stop-color:#FF0099;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#FF0099;stop-opacity:0"/>
+    </radialGradient>
+
+    <!-- World 4: Enchanted Garden - Green -->
+    <radialGradient id="world4">
+      <stop offset="0%" style="stop-color:#A3B18A;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#588157;stop-opacity:0"/>
+    </radialGradient>
+
+    <!-- Gem gradient -->
+    <linearGradient id="gemGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#E94560"/>
+      <stop offset="100%" style="stop-color:#a21a32"/>
+    </linearGradient>
+
+    <!-- Text glow filter -->
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Soft glow for orbs -->
+    <filter id="softGlow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="20" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bgGrad)"/>
+
+  <!-- Subtle grid pattern -->
+  <g opacity="0.03">
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" stroke-width="1"/>
+    </pattern>
+    <rect width="1200" height="630" fill="url(#grid)"/>
+  </g>
+
+  <!-- Decorative world orbs in background -->
+  <!-- World 1 - Top left -->
+  <ellipse cx="150" cy="120" rx="120" ry="120" fill="url(#world1)" opacity="0.3" filter="url(#softGlow)"/>
+
+  <!-- World 2 - Top right -->
+  <ellipse cx="1050" cy="150" rx="100" ry="100" fill="url(#world2)" opacity="0.3" filter="url(#softGlow)"/>
+
+  <!-- World 3 - Bottom left -->
+  <ellipse cx="180" cy="520" rx="90" ry="90" fill="url(#world3)" opacity="0.3" filter="url(#softGlow)"/>
+
+  <!-- World 4 - Bottom right -->
+  <ellipse cx="1020" cy="500" rx="110" ry="110" fill="url(#world4)" opacity="0.3" filter="url(#softGlow)"/>
+
+  <!-- Small floating gems/stars scattered -->
+  <g opacity="0.6">
+    <!-- Gem 1 -->
+    <polygon points="280,200 290,220 280,240 270,220" fill="url(#gemGrad)" transform="rotate(15, 280, 220)"/>
+    <!-- Gem 2 -->
+    <polygon points="920,180 930,200 920,220 910,200" fill="#00FFF5" transform="rotate(-10, 920, 200)"/>
+    <!-- Gem 3 -->
+    <polygon points="350,450 360,470 350,490 340,470" fill="#FFD700" transform="rotate(20, 350, 470)"/>
+    <!-- Gem 4 -->
+    <polygon points="850,420 860,440 850,460 840,440" fill="#C8B6FF" transform="rotate(-15, 850, 440)"/>
+    <!-- Small stars -->
+    <circle cx="450" cy="150" r="3" fill="#00FFF5"/>
+    <circle cx="750" cy="130" r="2" fill="#FF0099"/>
+    <circle cx="500" cy="480" r="3" fill="#F8B195"/>
+    <circle cx="700" cy="500" r="2" fill="#A3B18A"/>
+    <circle cx="200" cy="320" r="2" fill="#FFE66D"/>
+    <circle cx="1000" cy="300" r="3" fill="#00FFF5"/>
+  </g>
+
+  <!-- Main title: Daydream -->
+  <text x="600" y="280"
+        font-family="Fredoka One, Arial Rounded MT Bold, Arial, sans-serif"
+        font-size="120"
+        font-weight="400"
+        fill="#FFFFFF"
+        text-anchor="middle"
+        filter="url(#glow)">
+    Daydream
+  </text>
+
+  <!-- Accent line under title -->
+  <rect x="400" y="310" width="400" height="4" rx="2" fill="#00FFF5" opacity="0.8"/>
+
+  <!-- Tagline -->
+  <text x="600" y="380"
+        font-family="Nunito, Arial, sans-serif"
+        font-size="32"
+        font-weight="600"
+        fill="#F9F9F9"
+        text-anchor="middle"
+        opacity="0.9">
+    Five minutes away from your feed
+  </text>
+
+  <!-- Subtitle -->
+  <text x="600" y="430"
+        font-family="Nunito, Arial, sans-serif"
+        font-size="22"
+        font-weight="400"
+        fill="#F9F9F9"
+        text-anchor="middle"
+        opacity="0.6">
+    A zen arcade experience
+  </text>
+
+  <!-- Four world indicator dots at bottom -->
+  <g transform="translate(600, 530)">
+    <circle cx="-60" cy="0" r="12" fill="#00FFF5" opacity="0.9"/>
+    <circle cx="-20" cy="0" r="12" fill="#F67280" opacity="0.9"/>
+    <circle cx="20" cy="0" r="12" fill="#FF0099" opacity="0.9"/>
+    <circle cx="60" cy="0" r="12" fill="#A3B18A" opacity="0.9"/>
+  </g>
+
+  <!-- "4 Worlds" label -->
+  <text x="600" y="575"
+        font-family="Nunito, Arial, sans-serif"
+        font-size="16"
+        font-weight="600"
+        fill="#F9F9F9"
+        text-anchor="middle"
+        opacity="0.5"
+        letter-spacing="3">
+    4 WORLDS
+  </text>
+
+</svg>
