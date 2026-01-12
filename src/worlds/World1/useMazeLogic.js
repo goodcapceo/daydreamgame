@@ -8,7 +8,7 @@ const TILE_SIZE = 40;
  * Custom hook for maze game logic in World 1
  * Handles player movement, crystal collection, hazard avoidance
  */
-export const useMazeLogic = (levelData, onComplete, onFail, playSound = () => {}) => {
+export const useMazeLogic = (levelData, onComplete, onFail, playSound = () => {}, isPaused = false) => {
   const [playerPos, setPlayerPos] = useState(levelData.startPos);
   // Extract initial crystals from grid and store count
   const initialCrystals = (() => {
@@ -169,7 +169,7 @@ export const useMazeLogic = (levelData, onComplete, onFail, playSound = () => {}
 
   // Timer countdown
   useEffect(() => {
-    if (gameState !== 'playing') return;
+    if (gameState !== 'playing' || isPaused) return;
 
     const timer = setInterval(() => {
       setTimeRemaining(prev => {
@@ -183,7 +183,7 @@ export const useMazeLogic = (levelData, onComplete, onFail, playSound = () => {}
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [gameState, onFail]);
+  }, [gameState, onFail, isPaused]);
 
   // Timer urgency sounds - escalating warnings as time runs low
   useEffect(() => {
@@ -220,10 +220,10 @@ export const useMazeLogic = (levelData, onComplete, onFail, playSound = () => {}
 
   // Hazard movement (using requestAnimationFrame for smoother updates)
   useEffect(() => {
-    if (gameState !== 'playing' || hazards.length === 0) return;
+    if (gameState !== 'playing' || isPaused || hazards.length === 0) return;
 
     let lastTime = Date.now();
-    const moveInterval = 500; // Move hazards every 500ms
+    const moveInterval = 350; // Move hazards every 350ms (faster!)
     let frameId;
 
     const updateHazards = () => {
@@ -254,6 +254,26 @@ export const useMazeLogic = (levelData, onComplete, onFail, playSound = () => {}
             }
           }
 
+          // Chase pattern - move towards player
+          if (hazard.pattern === 'chase') {
+            const dx = playerPos.x - newHazard.currentX;
+            const dy = playerPos.y - newHazard.currentY;
+
+            // Move in the direction of the player (one step at a time)
+            if (Math.abs(dx) > Math.abs(dy)) {
+              const newX = newHazard.currentX + Math.sign(dx);
+              // Check if new position is walkable (not a wall)
+              if (!checkGridCollision(newX, newHazard.currentY, levelData.grid)) {
+                newHazard.currentX = newX;
+              }
+            } else if (dy !== 0) {
+              const newY = newHazard.currentY + Math.sign(dy);
+              if (!checkGridCollision(newHazard.currentX, newY, levelData.grid)) {
+                newHazard.currentY = newY;
+              }
+            }
+          }
+
           return newHazard;
         }));
       }
@@ -266,7 +286,7 @@ export const useMazeLogic = (levelData, onComplete, onFail, playSound = () => {}
     return () => {
       if (frameId) cancelAnimationFrame(frameId);
     };
-  }, [gameState, hazards.length]);
+  }, [gameState, hazards.length, isPaused, playerPos, levelData.grid, checkGridCollision]);
 
   // Calculate mood based on nearby hazards (derived state, no effect needed)
   const calculatedMood = (() => {
