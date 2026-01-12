@@ -2,19 +2,34 @@ import React from 'react';
 import { WORLD2_LEVELS } from './levels';
 import { usePlatformerLogic } from './usePlatformerLogic';
 import { useGameState } from '../../engine/useGameState';
-import { Pause, Star, Flag } from 'lucide-react';
+import { Pause } from 'lucide-react';
 
-// Kenney bunny sprites
-const BUNNY_SPRITES = {
-  stand: '/assets/kenney/world2/bunny1_stand.png',
-  jump: '/assets/kenney/world2/bunny1_jump.png',
-  walk1: '/assets/kenney/world2/bunny1_walk1.png',
-  walk2: '/assets/kenney/world2/bunny1_walk2.png',
-};
+// Kenney UI assets
+const STAR_FILLED = '/assets/kenney/ui/stars/star_filled.png';
+const FLAG_ICON = '/assets/kenney/ui/icons/flagGreen1.png';
+const CLOUD_SPRITE = '/assets/kenney/world2/cloud.png';
+
+// Kenney bunny sprites - two color variants for variety
+const BUNNY_VARIANTS = [
+  {
+    stand: '/assets/kenney/world2/bunny1_stand.png',
+    jump: '/assets/kenney/world2/bunny1_jump.png',
+    walk1: '/assets/kenney/world2/bunny1_walk1.png',
+    walk2: '/assets/kenney/world2/bunny1_walk2.png',
+  },
+  {
+    stand: '/assets/kenney/world2/bunny2/bunny2_stand.png',
+    jump: '/assets/kenney/world2/bunny2/bunny2_jump.png',
+    walk1: '/assets/kenney/world2/bunny2/bunny2_walk1.png',
+    walk2: '/assets/kenney/world2/bunny2/bunny2_walk2.png',
+  },
+];
+// Use bunny variant based on level ID for variety
+const getBunnySprites = (levelId) => BUNNY_VARIANTS[(levelId - 1) % BUNNY_VARIANTS.length];
 const STAR_SPRITE = '/assets/kenney/world2/star.png';
 
 const SkylineCity = ({ levelId }) => {
-  const { completeLevel, failLevel, setShowPauseMenu, playSound } = useGameState();
+  const { completeLevel, failLevel, setShowPauseMenu, showPauseMenu, playSound } = useGameState();
 
   const levelData = WORLD2_LEVELS.find(l => l.id === levelId);
 
@@ -23,7 +38,8 @@ const SkylineCity = ({ levelId }) => {
     platforms,
     stars,
     score,
-  } = usePlatformerLogic(levelData, completeLevel, failLevel, playSound);
+    cameraY,
+  } = usePlatformerLogic(levelData, completeLevel, failLevel, playSound, showPauseMenu);
 
   return (
     <div
@@ -31,78 +47,12 @@ const SkylineCity = ({ levelId }) => {
       style={{
         background: 'var(--w2-sky-gradient)',
         overflow: 'hidden',
+        touchAction: 'manipulation',
+        userSelect: 'none',
+        WebkitUserSelect: 'none',
+        WebkitTouchCallout: 'none',
       }}
     >
-      {/* Enhanced decorative clouds */}
-      {/* Large fluffy cloud - left */}
-      <div className="absolute" style={{ top: '8%', left: '5%' }}>
-        <div
-          className="anim-float"
-          style={{
-            position: 'relative',
-            width: 120,
-            height: 50,
-            background: 'rgba(255, 255, 255, 0.9)',
-            borderRadius: '50px',
-            boxShadow: '0 4px 20px rgba(255, 255, 255, 0.3)',
-          }}
-        >
-          <div style={{ position: 'absolute', top: -20, left: 20, width: 50, height: 50, background: 'rgba(255, 255, 255, 0.9)', borderRadius: '50%' }} />
-          <div style={{ position: 'absolute', top: -15, left: 55, width: 40, height: 40, background: 'rgba(255, 255, 255, 0.9)', borderRadius: '50%' }} />
-          <div style={{ position: 'absolute', top: -10, left: 85, width: 30, height: 30, background: 'rgba(255, 255, 255, 0.85)', borderRadius: '50%' }} />
-        </div>
-      </div>
-
-      {/* Medium cloud - right */}
-      <div className="absolute" style={{ top: '15%', right: '10%' }}>
-        <div
-          className="anim-float"
-          style={{
-            position: 'relative',
-            width: 90,
-            height: 40,
-            background: 'rgba(255, 255, 255, 0.85)',
-            borderRadius: '40px',
-            boxShadow: '0 4px 16px rgba(255, 255, 255, 0.25)',
-            animationDelay: '1s',
-          }}
-        >
-          <div style={{ position: 'absolute', top: -15, left: 15, width: 40, height: 40, background: 'rgba(255, 255, 255, 0.85)', borderRadius: '50%' }} />
-          <div style={{ position: 'absolute', top: -10, left: 45, width: 30, height: 30, background: 'rgba(255, 255, 255, 0.8)', borderRadius: '50%' }} />
-        </div>
-      </div>
-
-      {/* Small distant cloud - center */}
-      <div className="absolute" style={{ top: '25%', left: '40%' }}>
-        <div
-          className="anim-float"
-          style={{
-            position: 'relative',
-            width: 60,
-            height: 25,
-            background: 'rgba(255, 255, 255, 0.6)',
-            borderRadius: '30px',
-            animationDelay: '2s',
-          }}
-        >
-          <div style={{ position: 'absolute', top: -10, left: 12, width: 25, height: 25, background: 'rgba(255, 255, 255, 0.6)', borderRadius: '50%' }} />
-          <div style={{ position: 'absolute', top: -6, left: 32, width: 18, height: 18, background: 'rgba(255, 255, 255, 0.55)', borderRadius: '50%' }} />
-        </div>
-      </div>
-
-      {/* Wispy cloud - bottom left */}
-      <div
-        className="absolute anim-float"
-        style={{
-          top: '35%',
-          left: '15%',
-          width: 70,
-          height: 25,
-          background: 'rgba(255, 255, 255, 0.5)',
-          borderRadius: '25px',
-          animationDelay: '3s',
-        }}
-      />
 
       {/* Top UI */}
       <div
@@ -115,7 +65,7 @@ const SkylineCity = ({ levelId }) => {
 
         <div className="glass-panel flex gap-4 px-4 py-2 items-center">
           <span className="flex items-center gap-1 text-body" style={{ color: 'var(--w2-text)' }}>
-            <Star size={16} fill="#FFD700" color="#FFD700" /> {stars.length}/{levelData.stars.length}
+            <img src={STAR_FILLED} alt="" style={{ width: 18, height: 18, imageRendering: 'pixelated' }} /> {stars.length}/{levelData.stars.length}
           </span>
           <span className="text-body" style={{ color: 'var(--w2-text)' }}>
             {score}
@@ -125,8 +75,26 @@ const SkylineCity = ({ levelId }) => {
         <div style={{ width: '44px' }} />
       </div>
 
-      {/* Game World */}
-      <div className="relative w-full h-full">
+      {/* Game World Container - clips the scrolling content */}
+      <div
+        className="absolute"
+        style={{
+          top: 80,
+          left: 0,
+          right: 0,
+          bottom: 80,
+          overflow: 'hidden',
+        }}
+      >
+        {/* Game World - with camera offset */}
+        <div
+          className="relative w-full"
+          style={{
+            height: 900,
+            transform: `translateY(${-cameraY}px)`,
+            transition: 'transform 200ms ease-out',
+          }}
+        >
         {/* Platforms */}
         {platforms.map((platform, index) => (
           <div
@@ -156,53 +124,21 @@ const SkylineCity = ({ levelId }) => {
           >
             {platform.type === 'finish' && (
               <div className="absolute-fill flex-center">
-                <Flag size={24} color="white" />
+                <img src={FLAG_ICON} alt="Finish" style={{ width: 28, height: 28, imageRendering: 'pixelated' }} />
               </div>
             )}
             {platform.type === 'cloud' && (
-              <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-                {/* Main cloud body */}
-                <div style={{
-                  position: 'absolute',
-                  bottom: 0,
-                  left: '10%',
-                  width: '80%',
+              <img
+                src={CLOUD_SPRITE}
+                alt="Cloud"
+                style={{
+                  width: '100%',
                   height: '100%',
-                  background: 'rgba(255, 255, 255, 0.85)',
-                  borderRadius: '40px',
-                  boxShadow: '0 4px 12px rgba(255, 255, 255, 0.3)',
-                }} />
-                {/* Left puff */}
-                <div style={{
-                  position: 'absolute',
-                  bottom: '30%',
-                  left: '5%',
-                  width: '35%',
-                  height: '90%',
-                  background: 'rgba(255, 255, 255, 0.85)',
-                  borderRadius: '50%',
-                }} />
-                {/* Right puff */}
-                <div style={{
-                  position: 'absolute',
-                  bottom: '20%',
-                  right: '10%',
-                  width: '30%',
-                  height: '80%',
-                  background: 'rgba(255, 255, 255, 0.8)',
-                  borderRadius: '50%',
-                }} />
-                {/* Center top puff */}
-                <div style={{
-                  position: 'absolute',
-                  bottom: '40%',
-                  left: '30%',
-                  width: '40%',
-                  height: '100%',
-                  background: 'rgba(255, 255, 255, 0.9)',
-                  borderRadius: '50%',
-                }} />
-              </div>
+                  objectFit: 'contain',
+                  imageRendering: 'pixelated',
+                  filter: 'drop-shadow(0 4px 12px rgba(255, 255, 255, 0.3))',
+                }}
+              />
             )}
           </div>
         ))}
@@ -237,7 +173,7 @@ const SkylineCity = ({ levelId }) => {
           }}
         >
           <img
-            src={player.vy < -2 ? BUNNY_SPRITES.jump : BUNNY_SPRITES.stand}
+            src={player.vy < -2 ? getBunnySprites(levelId).jump : getBunnySprites(levelId).stand}
             alt="Player"
             style={{
               width: '100%',
@@ -247,14 +183,21 @@ const SkylineCity = ({ levelId }) => {
             }}
           />
         </div>
+        </div>
       </div>
 
       {/* Instructions */}
       <p
-        className="absolute bottom-8 left-0 right-0 text-small text-center"
-        style={{ color: 'var(--w2-text)', opacity: 0.6 }}
+        className="absolute text-small text-center"
+        style={{
+          bottom: 'calc(env(safe-area-inset-bottom, 0px) + 32px)',
+          left: 0,
+          right: 0,
+          color: 'var(--w2-text)',
+          opacity: 0.6,
+        }}
       >
-        Tap to jump • Swipe to move
+        Tap to jump • Double-tap for boost • Swipe to move
       </p>
     </div>
   );

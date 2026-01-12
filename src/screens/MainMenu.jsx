@@ -1,13 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { useGameState } from '../engine/useGameState';
-import { Settings, Volume2, Info, Heart } from 'lucide-react';
+import { Settings, Volume2, Info } from 'lucide-react';
 
-// Kenney character sprites for showcase
+// Kenney UI assets
+const HEART_ICON = '/assets/kenney/ui/icons/hudHeart_full.png';
+
+// Kenney character sprites for showcase - expanded with shape characters
 const CHARACTER_SPRITES = [
   { src: '/assets/kenney/world1/player.png', name: 'Crystal', world: 1 },
   { src: '/assets/kenney/world2/bunny1_stand.png', name: 'Bunny', world: 2 },
+  { src: '/assets/kenney/world2/bunny2/bunny2_stand.png', name: 'Bunny Pink', world: 2 },
   { src: '/assets/kenney/world3/player.png', name: 'Ball', world: 3 },
-  { src: '/assets/kenney/world4/tile_pink.png', name: 'Tile', world: 4 },
+  { src: '/assets/kenney/world3/ball_blue.png', name: 'Blue Ball', world: 3 },
+  { src: '/assets/kenney/characters/blue_body_circle.png', name: 'Blue', world: 0 },
+  { src: '/assets/kenney/characters/red_body_circle.png', name: 'Red', world: 0 },
+  { src: '/assets/kenney/characters/green_body_circle.png', name: 'Green', world: 0 },
+  { src: '/assets/kenney/characters/yellow_body_circle.png', name: 'Yellow', world: 0 },
+  { src: '/assets/kenney/characters/purple_body_circle.png', name: 'Purple', world: 0 },
 ];
 
 // Pre-generate particle styles at module level (once, outside component)
@@ -110,7 +119,11 @@ const MainMenu = () => {
             boxShadow: '0 4px 12px rgba(255, 107, 107, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
           }}
         >
-          <Heart size={20} fill="#FF6B6B" color="#FF6B6B" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.3))' }} />
+          <img
+            src={HEART_ICON}
+            alt="Lives"
+            style={{ width: 22, height: 22, imageRendering: 'pixelated', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.3))' }}
+          />
           <span style={{ color: '#FF6B6B', fontWeight: 700, fontSize: '16px', textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}>
             {lives}
           </span>

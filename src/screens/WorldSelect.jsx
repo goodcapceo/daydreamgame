@@ -1,7 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useGameState } from '../engine/useGameState';
 import { WORLDS, GAME_CONFIG } from '../utils/constants';
-import { ArrowLeft, Star, Lock, ChevronRight } from 'lucide-react';
+import { ArrowLeft, ChevronRight } from 'lucide-react';
+
+// Kenney UI assets
+const STAR_FILLED = '/assets/kenney/ui/stars/star_filled.png';
+const LOCK_ICON = '/assets/kenney/ui/icons/lock_yellow.png';
 
 // Pre-generate particle styles
 const generateParticleStyles = () =>
@@ -97,7 +101,7 @@ const WorldSelect = () => {
               Worlds
             </h2>
             <div className="flex items-center gap-2 mt-1">
-              <Star size={14} fill="#FFD700" color="#FFD700" />
+              <img src={STAR_FILLED} alt="" style={{ width: 16, height: 16, imageRendering: 'pixelated' }} />
               <span style={{ color: '#FFD700', fontSize: 14, fontWeight: 600 }}>{totalStars}</span>
               <span style={{ color: 'rgba(255, 215, 0, 0.5)', fontSize: 12 }}>/ {maxStars}</span>
             </div>
@@ -163,7 +167,7 @@ const WorldSelect = () => {
                 }}
               >
                 {isLocked ? (
-                  <Lock size={28} color="rgba(255, 255, 255, 0.3)" />
+                  <img src={LOCK_ICON} alt="Locked" style={{ width: 28, height: 28, imageRendering: 'pixelated', opacity: 0.3 }} />
                 ) : (
                   <img
                     src={WORLD_SPRITES[world.id]}
@@ -229,7 +233,7 @@ const WorldSelect = () => {
               {!isLocked && (
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-1">
-                    <Star size={16} fill="#FFD700" color="#FFD700" />
+                    <img src={STAR_FILLED} alt="" style={{ width: 18, height: 18, imageRendering: 'pixelated' }} />
                     <span style={{ color: '#FFD700', fontSize: 14, fontWeight: 600 }}>
                       {worldProgress.totalStars}
                     </span>

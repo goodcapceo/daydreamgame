@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useGameState } from '../../engine/useGameState';
-import { Star, ChevronRight, RotateCcw, Grid } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
+
+// Kenney UI assets
+const STAR_FILLED = '/assets/kenney/ui/stars/star_filled.png';
+const STAR_GREY = '/assets/kenney/ui/stars/star_grey.png';
+const RETRY_ICON = '/assets/kenney/ui/icons/retry.png';
+const ARROW_RIGHT = '/assets/kenney/ui/icons/arrow_right.png';
 
 const LevelComplete = () => {
   const { levelResults, nextLevel, retryLevel, navigateTo, selectedWorld, playSound } = useGameState();
@@ -105,11 +111,13 @@ const LevelComplete = () => {
                     }}
                   />
                 )}
-                <Star
-                  size={56}
-                  fill={isEarned ? '#FFD700' : 'transparent'}
-                  color={isEarned ? '#FFD700' : 'rgba(255, 255, 255, 0.3)'}
+                <img
+                  src={isEarned ? STAR_FILLED : STAR_GREY}
+                  alt=""
                   style={{
+                    width: 56,
+                    height: 56,
+                    imageRendering: 'pixelated',
                     filter: isEarned ? 'drop-shadow(0 4px 12px rgba(255, 215, 0, 0.6))' : 'none',
                   }}
                 />
@@ -189,7 +197,7 @@ const LevelComplete = () => {
                 cursor: 'pointer',
               }}
             >
-              <RotateCcw size={18} />
+              <img src={RETRY_ICON} alt="" style={{ width: 20, height: 20, imageRendering: 'pixelated' }} />
               Retry
             </button>
             <button

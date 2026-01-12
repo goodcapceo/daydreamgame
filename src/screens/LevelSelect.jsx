@@ -1,11 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useGameState } from '../engine/useGameState';
 import { WORLDS } from '../utils/constants';
-import { ArrowLeft, Lock, Play } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
+
+// Kenney UI assets
+const LOCK_ICON = '/assets/kenney/ui/icons/lock_yellow.png';
+const PLAY_ICON = '/assets/kenney/ui/icons/play.png';
 
 // Kenney star sprites
 const STAR_FILLED = '/assets/kenney/ui/stars/star_filled.png';
 const STAR_EMPTY = '/assets/kenney/ui/stars/star_grey.png';
+
+// World-specific backgrounds matching each world's theme
+const WORLD_BACKGROUNDS = {
+  1: 'linear-gradient(180deg, #1A1A2E 0%, #0F3460 40%, #16213E 70%, #1A1A2E 100%)', // Crystal Caverns - dark cave
+  2: 'linear-gradient(to top, #6C5B7B 0%, #C06C84 30%, #F67280 60%, #F8B195 100%)', // Skyline City - sunset
+  3: 'linear-gradient(180deg, #050505 0%, #1a0a2e 30%, #0a1628 60%, #050505 100%)', // Neon Rush - cyberpunk
+  4: 'linear-gradient(to bottom, #1a3a1a 0%, #2d5a2d 30%, #3A5A40 60%, #1a3a1a 100%)', // Enchanted Garden - forest
+};
 
 const LevelCard = ({ level, world, isUnlocked, onSelect, delay }) => {
   const hasStars = level.stars > 0;
@@ -53,7 +65,7 @@ const LevelCard = ({ level, world, isUnlocked, onSelect, delay }) => {
           {/* Level number */}
           <span
             style={{
-              fontSize: 28,
+              fontSize: 36,
               fontWeight: 700,
               color: level.completed ? world.color : 'white',
               textShadow: level.completed ? `0 0 20px ${world.color}60` : 'none',
@@ -63,15 +75,15 @@ const LevelCard = ({ level, world, isUnlocked, onSelect, delay }) => {
           </span>
 
           {/* Stars */}
-          <div className="flex" style={{ gap: 2 }}>
+          <div className="flex" style={{ gap: 4 }}>
             {[1, 2, 3].map((s) => (
               <img
                 key={s}
                 src={hasStars && s <= level.stars ? STAR_FILLED : STAR_EMPTY}
                 alt=""
                 style={{
-                  width: 12,
-                  height: 12,
+                  width: 18,
+                  height: 18,
                   imageRendering: 'pixelated',
                   opacity: hasStars && s <= level.stars ? 1 : 0.4,
                 }}
@@ -79,29 +91,27 @@ const LevelCard = ({ level, world, isUnlocked, onSelect, delay }) => {
             ))}
           </div>
 
-          {/* Play indicator for next level */}
+          {/* Play button for next level - centered and larger */}
           {!level.completed && isUnlocked && (
             <div
-              className="absolute"
               style={{
-                top: 4,
-                right: 4,
-                width: 18,
-                height: 18,
+                marginTop: 8,
+                width: 40,
+                height: 40,
                 borderRadius: '50%',
                 background: world.color,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: `0 0 8px ${world.color}`,
+                boxShadow: `0 0 16px ${world.color}`,
               }}
             >
-              <Play size={8} color="white" fill="white" style={{ marginLeft: 1 }} />
+              <img src={PLAY_ICON} alt="Play" style={{ width: 20, height: 20, imageRendering: 'pixelated' }} />
             </div>
           )}
         </>
       ) : (
-        <Lock size={24} color="rgba(255, 255, 255, 0.25)" />
+        <img src={LOCK_ICON} alt="Locked" style={{ width: 28, height: 28, imageRendering: 'pixelated', opacity: 0.25 }} />
       )}
     </button>
   );
@@ -134,7 +144,7 @@ const LevelSelect = () => {
     <div
       className="screen-container"
       style={{
-        background: `linear-gradient(180deg, #0a0a1a 0%, ${world.color}15 50%, #0a0a1a 100%)`,
+        background: WORLD_BACKGROUNDS[selectedWorld] || `linear-gradient(180deg, #0a0a1a 0%, ${world.color}15 50%, #0a0a1a 100%)`,
       }}
     >
       {/* Background glow */}
@@ -203,10 +213,18 @@ const LevelSelect = () => {
 
       {/* Levels grid */}
       <div
-        className="absolute-fill flex-center"
         style={{
-          paddingTop: 100,
-          paddingBottom: 80,
+          position: 'absolute',
+          top: 100,
+          bottom: 80,
+          left: 0,
+          right: 0,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'flex-start',
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          WebkitOverflowScrolling: 'touch',
           opacity: showContent ? 1 : 0,
           transition: 'opacity 0.3s ease',
         }}
@@ -214,10 +232,10 @@ const LevelSelect = () => {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(5, 1fr)',
-            gap: 12,
-            width: '90%',
-            maxWidth: 400,
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: 16,
+            width: '85%',
+            maxWidth: 320,
             padding: 16,
           }}
         >

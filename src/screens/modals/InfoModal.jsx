@@ -1,7 +1,12 @@
 import React from 'react';
 import { useGameState } from '../../engine/useGameState';
 import { WORLDS } from '../../utils/constants';
-import { X, Star, Heart } from 'lucide-react';
+import { X } from 'lucide-react';
+
+// Kenney UI assets
+const STAR_FILLED = '/assets/kenney/ui/stars/star_filled.png';
+const STAR_GREY = '/assets/kenney/ui/stars/star_grey.png';
+const HEART_ICON = '/assets/kenney/ui/icons/hudHeart_full.png';
 
 const InfoModal = () => {
   const { setShowInfoModal } = useGameState();
@@ -132,25 +137,25 @@ const InfoModal = () => {
           }}
         >
           <h3 className="flex items-center gap-2" style={{ color: 'var(--text-light)', fontWeight: 600, fontSize: 'var(--text-sm)' }}>
-            <Star size={16} fill="#FFD700" color="#FFD700" /> Star Rating
+            <img src={STAR_FILLED} alt="" style={{ width: 16, height: 16, imageRendering: 'pixelated' }} /> Star Rating
           </h3>
           <div className="flex-col gap-1 text-xs" style={{ color: 'rgba(255,255,255,0.8)' }}>
             <div className="flex items-center gap-1">
-              <Star size={12} fill="#FFD700" color="#FFD700" />
-              <Star size={12} fill="#FFD700" color="#FFD700" />
-              <Star size={12} fill="#FFD700" color="#FFD700" />
+              <img src={STAR_FILLED} alt="" style={{ width: 12, height: 12, imageRendering: 'pixelated' }} />
+              <img src={STAR_FILLED} alt="" style={{ width: 12, height: 12, imageRendering: 'pixelated' }} />
+              <img src={STAR_FILLED} alt="" style={{ width: 12, height: 12, imageRendering: 'pixelated' }} />
               <span style={{ marginLeft: '4px' }}>Complete 90%+ of objectives</span>
             </div>
             <div className="flex items-center gap-1">
-              <Star size={12} fill="#FFD700" color="#FFD700" />
-              <Star size={12} fill="#FFD700" color="#FFD700" />
-              <Star size={12} color="rgba(255,255,255,0.3)" />
+              <img src={STAR_FILLED} alt="" style={{ width: 12, height: 12, imageRendering: 'pixelated' }} />
+              <img src={STAR_FILLED} alt="" style={{ width: 12, height: 12, imageRendering: 'pixelated' }} />
+              <img src={STAR_GREY} alt="" style={{ width: 12, height: 12, imageRendering: 'pixelated', opacity: 0.4 }} />
               <span style={{ marginLeft: '4px' }}>Complete 60%+ of objectives</span>
             </div>
             <div className="flex items-center gap-1">
-              <Star size={12} fill="#FFD700" color="#FFD700" />
-              <Star size={12} color="rgba(255,255,255,0.3)" />
-              <Star size={12} color="rgba(255,255,255,0.3)" />
+              <img src={STAR_FILLED} alt="" style={{ width: 12, height: 12, imageRendering: 'pixelated' }} />
+              <img src={STAR_GREY} alt="" style={{ width: 12, height: 12, imageRendering: 'pixelated', opacity: 0.4 }} />
+              <img src={STAR_GREY} alt="" style={{ width: 12, height: 12, imageRendering: 'pixelated', opacity: 0.4 }} />
               <span style={{ marginLeft: '4px' }}>Complete 30%+ of objectives</span>
             </div>
           </div>
@@ -168,7 +173,7 @@ const InfoModal = () => {
           }}
         >
           <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.6)' }}>
-            Made with <Heart size={10} fill="#FF6B6B" color="#FF6B6B" style={{ display: 'inline', verticalAlign: 'middle' }} /> for mindful gaming • v1.0.0
+            Made with <img src={HEART_ICON} alt="love" style={{ display: 'inline', verticalAlign: 'middle', width: 12, height: 12, imageRendering: 'pixelated' }} /> for mindful gaming • v1.0.0
           </p>
         </div>
       </div>
