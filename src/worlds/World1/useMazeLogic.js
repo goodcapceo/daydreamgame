@@ -288,6 +288,21 @@ export const useMazeLogic = (levelData, onComplete, onFail, playSound = () => {}
     };
   }, [gameState, hazards.length, isPaused, playerPos, levelData.grid, checkGridCollision]);
 
+  // Check if hazards have moved into player position
+  useEffect(() => {
+    if (gameState !== 'playing') return;
+
+    const hazardHitPlayer = hazards.some(
+      h => h.currentX === playerPos.x && h.currentY === playerPos.y
+    );
+
+    if (hazardHitPlayer) {
+      setGameState('failed');
+      playSound('fail');
+      onFail();
+    }
+  }, [hazards, playerPos, gameState, playSound, onFail]);
+
   // Calculate mood based on nearby hazards (derived state, no effect needed)
   const calculatedMood = (() => {
     // Don't override 'happy' mood (set after collecting crystal)

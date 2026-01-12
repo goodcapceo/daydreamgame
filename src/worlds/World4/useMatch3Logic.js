@@ -12,7 +12,7 @@ export const useMatch3Logic = (levelData, onComplete, onFail, playSound = () => 
   const [moves, setMoves] = useState(levelData.moves);
   const [gameState, setGameState] = useState('playing');
   const [grid, setGrid] = useState(() => generateGrid(levelData.gridSize.rows, levelData.gridSize.cols, levelData.tileTypes));
-  const [collected, setCollected] = useState({ pink: 0, purple: 0, yellow: 0, blue: 0 });
+  const [collected, setCollected] = useState({ red: 0, green: 0, pink: 0, yellow: 0, blue: 0 });
   const [lastMatchPoints, setLastMatchPoints] = useState(null); // { points, x, y } for floating indicator
 
   // Drag state

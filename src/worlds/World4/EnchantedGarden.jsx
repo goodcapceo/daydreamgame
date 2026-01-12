@@ -10,25 +10,21 @@ const GAP = 4;
 // Kenney UI assets
 const STAR_FILLED = '/assets/kenney/ui/stars/star_filled.png';
 
-// Kenney puzzle tile sprites - expanded with more colors from puzzle-pack-2
+// Kenney puzzle tile sprites - 5 distinct colors for clarity
 const TILE_SPRITES = {
+  red: '/assets/kenney/world4/tiles/tile_red.png',
+  green: '/assets/kenney/world4/tiles/tile_green.png',
   pink: '/assets/kenney/world4/tile_pink.png',
-  purple: '/assets/kenney/world4/tile_purple.png',
   yellow: '/assets/kenney/world4/tile_yellow.png',
   blue: '/assets/kenney/world4/tiles/tile_blue.png',
-  green: '/assets/kenney/world4/tiles/tile_green.png',
-  orange: '/assets/kenney/world4/tiles/tile_orange.png',
-  red: '/assets/kenney/world4/tiles/tile_red.png',
 };
 
 const TILE_COLORS = {
+  red: '#ff7675',
+  green: '#55efc4',
   pink: 'var(--w4-flower-pink)',
-  purple: 'var(--w4-flower-purple)',
   yellow: 'var(--w4-flower-yellow)',
   blue: '#74b9ff',
-  green: '#55efc4',
-  orange: '#fdcb6e',
-  red: '#ff7675',
 };
 
 const EnchantedGarden = ({ levelId }) => {

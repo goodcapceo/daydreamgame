@@ -39,6 +39,8 @@ export const usePlatformerLogic = (levelData, onComplete, onFail, playSound = ()
   const previousYRef = useRef(player.y);
   const groundedRef = useRef(player.grounded);
   const playerRef = useRef(player);
+  const canDoubleJumpRef = useRef(false); // Track if double jump is available
+  const playerVyRef = useRef(player.vy);
 
   const { checkPlatformCollision } = useCollision();
 
@@ -50,6 +52,12 @@ export const usePlatformerLogic = (levelData, onComplete, onFail, playSound = ()
   useEffect(() => {
     groundedRef.current = player.grounded;
     playerRef.current = player;
+    playerVyRef.current = player.vy;
+
+    // Reset double jump when player lands
+    if (player.grounded) {
+      canDoubleJumpRef.current = true;
+    }
   }, [player]);
 
   // Keyboard input
@@ -57,9 +65,18 @@ export const usePlatformerLogic = (levelData, onComplete, onFail, playSound = ()
     const handleKeyDown = (e) => {
       if (e.code === 'ArrowLeft' || e.code === 'KeyA') keysRef.current.left = true;
       if (e.code === 'ArrowRight' || e.code === 'KeyD') keysRef.current.right = true;
-      if ((e.code === 'ArrowUp' || e.code === 'KeyW' || e.code === 'Space') && player.grounded) {
-        setPlayer(prev => ({ ...prev, vy: PHYSICS.JUMP_STRENGTH, grounded: false }));
-        playSound('jump');
+
+      if (e.code === 'ArrowUp' || e.code === 'KeyW' || e.code === 'Space') {
+        if (groundedRef.current) {
+          // First jump from ground
+          setPlayer(prev => ({ ...prev, vy: PHYSICS.JUMP_STRENGTH, grounded: false }));
+          playSound('jump');
+        } else if (canDoubleJumpRef.current && playerVyRef.current > -3) {
+          // Double jump - only when near peak of jump (vy > -3 means slowing down or falling)
+          canDoubleJumpRef.current = false;
+          setPlayer(prev => ({ ...prev, vy: PHYSICS.JUMP_STRENGTH * 0.85 }));
+          playSound('jump');
+        }
       }
     };
 
@@ -75,12 +92,7 @@ export const usePlatformerLogic = (levelData, onComplete, onFail, playSound = ()
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [player.grounded, playSound]);
-
-  // Track double-tap for boost jump
-  const lastTapTimeRef = useRef(0);
-  const DOUBLE_TAP_THRESHOLD = 300; // ms
-  const BOOST_MULTIPLIER = 1.4;
+  }, [playSound]);
 
   // Touch controls
   useEffect(() => {
@@ -93,18 +105,15 @@ export const usePlatformerLogic = (levelData, onComplete, onFail, playSound = ()
       const touch = e.touches[0];
       touchStartX = touch.clientX;
 
-      // Detect double-tap for boost jump
-      const now = Date.now();
-      const timeSinceLastTap = now - lastTapTimeRef.current;
-      const isDoubleTap = timeSinceLastTap < DOUBLE_TAP_THRESHOLD;
-      lastTapTimeRef.current = now;
-
-      // Tap to jump - use ref to get current grounded state
+      // Tap to jump
       if (groundedRef.current) {
-        const jumpStrength = isDoubleTap
-          ? PHYSICS.JUMP_STRENGTH * BOOST_MULTIPLIER
-          : PHYSICS.JUMP_STRENGTH;
-        setPlayer(prev => ({ ...prev, vy: jumpStrength, grounded: false }));
+        // First jump from ground
+        setPlayer(prev => ({ ...prev, vy: PHYSICS.JUMP_STRENGTH, grounded: false }));
+        playSound('jump');
+      } else if (canDoubleJumpRef.current && playerVyRef.current > -3) {
+        // Double jump - only when near peak of jump (vy > -3 means slowing down or falling)
+        canDoubleJumpRef.current = false;
+        setPlayer(prev => ({ ...prev, vy: PHYSICS.JUMP_STRENGTH * 0.85 }));
         playSound('jump');
       }
     };
@@ -134,7 +143,7 @@ export const usePlatformerLogic = (levelData, onComplete, onFail, playSound = ()
       window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [playSound]); // groundedRef is used instead of player.grounded
+  }, [playSound]);
 
   // Game loop
   useEffect(() => {

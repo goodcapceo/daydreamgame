@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useGameState } from '../../engine/useGameState';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Grid } from 'lucide-react';
 
 // Kenney UI assets
 const STAR_FILLED = '/assets/kenney/ui/stars/star_filled.png';
