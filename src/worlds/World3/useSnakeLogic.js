@@ -9,7 +9,7 @@ import { useCollision } from '../../engine/useCollision';
  * Initialization effect intentionally sets state when levelData becomes available.
  */
 
-export const useSnakeLogic = (levelData, onComplete, onFail, playSound = () => {}) => {
+export const useSnakeLogic = (levelData, onComplete, onFail, playSound = () => {}, isPaused = false) => {
   const [score, setScore] = useState(0);
   const [speed, setSpeed] = useState(3);
   const [gameState, setGameState] = useState('waiting');
@@ -132,7 +132,7 @@ export const useSnakeLogic = (levelData, onComplete, onFail, playSound = () => {
   }, [changeDirection]);
 
   useEffect(() => {
-    if (gameState !== 'playing' || !levelData) return;
+    if (gameState !== 'playing' || !levelData || isPaused) return;
 
     let lastTime = Date.now();
     let accumulator = 0;
@@ -238,7 +238,7 @@ export const useSnakeLogic = (levelData, onComplete, onFail, playSound = () => {
       isRunning = false;
       if (frameId) cancelAnimationFrame(frameId);
     };
-  }, [gameState, levelData, checkAABB, onComplete, onFail, playSound]);
+  }, [gameState, levelData, checkAABB, onComplete, onFail, playSound, isPaused]);
 
   return {
     trail,

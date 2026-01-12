@@ -6,7 +6,7 @@ import { useCollision } from '../../engine/useCollision';
  * Custom hook for platformer game logic in World 2
  * Handles physics, jumping, platform collision, star collection
  */
-export const usePlatformerLogic = (levelData, onComplete, onFail, playSound = () => {}) => {
+export const usePlatformerLogic = (levelData, onComplete, onFail, playSound = () => {}, isPaused = false) => {
   const [player, setPlayer] = useState({
     x: levelData.startPos.x,
     y: levelData.startPos.y,
@@ -77,17 +77,34 @@ export const usePlatformerLogic = (levelData, onComplete, onFail, playSound = ()
     };
   }, [player.grounded, playSound]);
 
+  // Track double-tap for boost jump
+  const lastTapTimeRef = useRef(0);
+  const DOUBLE_TAP_THRESHOLD = 300; // ms
+  const BOOST_MULTIPLIER = 1.4;
+
   // Touch controls
   useEffect(() => {
     let touchStartX = null;
 
     const handleTouchStart = (e) => {
+      // Prevent default to stop text selection and double-tap zoom
+      e.preventDefault();
+
       const touch = e.touches[0];
       touchStartX = touch.clientX;
 
+      // Detect double-tap for boost jump
+      const now = Date.now();
+      const timeSinceLastTap = now - lastTapTimeRef.current;
+      const isDoubleTap = timeSinceLastTap < DOUBLE_TAP_THRESHOLD;
+      lastTapTimeRef.current = now;
+
       // Tap to jump - use ref to get current grounded state
       if (groundedRef.current) {
-        setPlayer(prev => ({ ...prev, vy: PHYSICS.JUMP_STRENGTH, grounded: false }));
+        const jumpStrength = isDoubleTap
+          ? PHYSICS.JUMP_STRENGTH * BOOST_MULTIPLIER
+          : PHYSICS.JUMP_STRENGTH;
+        setPlayer(prev => ({ ...prev, vy: jumpStrength, grounded: false }));
         playSound('jump');
       }
     };
@@ -108,7 +125,7 @@ export const usePlatformerLogic = (levelData, onComplete, onFail, playSound = ()
       keysRef.current.right = false;
     };
 
-    window.addEventListener('touchstart', handleTouchStart, { passive: true });
+    window.addEventListener('touchstart', handleTouchStart, { passive: false });
     window.addEventListener('touchmove', handleTouchMove, { passive: true });
     window.addEventListener('touchend', handleTouchEnd, { passive: true });
 
@@ -121,7 +138,7 @@ export const usePlatformerLogic = (levelData, onComplete, onFail, playSound = ()
 
   // Game loop
   useEffect(() => {
-    if (gameState !== 'playing') return;
+    if (gameState !== 'playing' || isPaused) return;
 
     let frameId;
     let lastTime = Date.now();
@@ -241,7 +258,15 @@ export const usePlatformerLogic = (levelData, onComplete, onFail, playSound = ()
     return () => {
       if (frameId) cancelAnimationFrame(frameId);
     };
-  }, [gameState, platforms, stars, score, player, levelData, checkPlatformCollision, onComplete, onFail, playSound, initialStarCount]);
+  }, [gameState, platforms, stars, score, player, levelData, checkPlatformCollision, onComplete, onFail, playSound, initialStarCount, isPaused]);
+
+  // Calculate camera offset to follow player (keep player visible in viewport)
+  // Player should appear roughly in the middle-lower part of the screen
+  const VIEWPORT_CENTER = 400; // Approximate center point where player should appear
+  const MAX_CAMERA_Y = 500; // Don't scroll too far down
+  // Clamp camera to avoid shake at extremes
+  const rawCameraY = player.y - VIEWPORT_CENTER;
+  const cameraY = Math.max(0, Math.min(rawCameraY, MAX_CAMERA_Y));
 
   return {
     player,
@@ -249,5 +274,6 @@ export const usePlatformerLogic = (levelData, onComplete, onFail, playSound = ()
     stars,
     score,
     gameState,
+    cameraY,
   };
 };

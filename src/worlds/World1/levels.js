@@ -29,8 +29,11 @@ export const WORLD1_LEVELS = [
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
     ],
     startPos: { x: 1, y: 1 },
-    timeLimit: 60,
+    timeLimit: 40,
     crystalsRequired: 3,
+    hazards: [
+      { x: 5, y: 5, pattern: 'horizontal', range: 2 },
+    ],
   },
 
   // LEVEL 2 - "Crystal Path"
@@ -51,8 +54,12 @@ export const WORLD1_LEVELS = [
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
     ],
     startPos: { x: 1, y: 1 },
-    timeLimit: 75,
+    timeLimit: 50,
     crystalsRequired: 4,
+    hazards: [
+      { x: 5, y: 3, pattern: 'vertical', range: 2 },
+      { x: 9, y: 5, pattern: 'vertical', range: 3 },
+    ],
   },
 
   // LEVEL 3 - "Dark Corners"
@@ -73,7 +80,7 @@ export const WORLD1_LEVELS = [
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
     ],
     startPos: { x: 1, y: 1 },
-    timeLimit: 90,
+    timeLimit: 60,
     crystalsRequired: 4,
     hazards: [
       { x: 4, y: 1, pattern: 'static' },
@@ -101,8 +108,12 @@ export const WORLD1_LEVELS = [
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
     ],
     startPos: { x: 1, y: 1 },
-    timeLimit: 75,
+    timeLimit: 50,
     crystalsRequired: 4,
+    hazards: [
+      { x: 5, y: 5, pattern: 'chase' },
+      { x: 8, y: 3, pattern: 'horizontal', range: 2 },
+    ],
   },
 
   // LEVEL 5 - "Crystal Maze"
@@ -123,8 +134,12 @@ export const WORLD1_LEVELS = [
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
     ],
     startPos: { x: 1, y: 1 },
-    timeLimit: 90,
+    timeLimit: 60,
     crystalsRequired: 3,
+    hazards: [
+      { x: 9, y: 3, pattern: 'vertical', range: 4 },
+      { x: 5, y: 7, pattern: 'horizontal', range: 3 },
+    ],
   },
 
   // LEVELS 6-10 (simplified for brevity, following same pattern)
@@ -145,7 +160,7 @@ export const WORLD1_LEVELS = [
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
     ],
     startPos: { x: 1, y: 1 },
-    timeLimit: 75,
+    timeLimit: 50,
     crystalsRequired: 4,
     hazards: [
       { x: 3, y: 1, pattern: 'horizontal', range: 2 },
@@ -170,8 +185,12 @@ export const WORLD1_LEVELS = [
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
     ],
     startPos: { x: 1, y: 1 },
-    timeLimit: 90,
+    timeLimit: 60,
     crystalsRequired: 4,
+    hazards: [
+      { x: 5, y: 3, pattern: 'chase' },
+      { x: 9, y: 7, pattern: 'vertical', range: 3 },
+    ],
   },
 
   {
@@ -191,11 +210,12 @@ export const WORLD1_LEVELS = [
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
     ],
     startPos: { x: 1, y: 1 },
-    timeLimit: 90,
+    timeLimit: 60,
     crystalsRequired: 5,
     hazards: [
       { x: 3, y: 3, pattern: 'vertical', range: 2 },
       { x: 7, y: 3, pattern: 'vertical', range: 2 },
+      { x: 5, y: 7, pattern: 'chase' },
     ],
   },
 
@@ -216,7 +236,7 @@ export const WORLD1_LEVELS = [
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
     ],
     startPos: { x: 1, y: 1 },
-    timeLimit: 75,
+    timeLimit: 50,
     crystalsRequired: 5,
     hazards: [
       { x: 5, y: 4, pattern: 'patrol', waypoints: [{ x: 5, y: 4 }, { x: 5, y: 6 }] },
@@ -240,10 +260,12 @@ export const WORLD1_LEVELS = [
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
     ],
     startPos: { x: 1, y: 9 },
-    timeLimit: 120,
+    timeLimit: 75,
     crystalsRequired: 6,
     hazards: [
-      { x: 2, y: 1, pattern: 'horizontal', range: 7 },
+      { x: 2, y: 1, pattern: 'horizontal', range: 6 },
+      { x: 5, y: 7, pattern: 'chase' },
+      { x: 9, y: 3, pattern: 'chase' },
     ],
   },
 ];
