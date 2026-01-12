@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { WORLD3_LEVELS } from './levels';
 import { useSnakeLogic } from './useSnakeLogic';
 import { useGameState } from '../../engine/useGameState';
@@ -19,10 +19,35 @@ const getPlayerSprite = (levelId) => BALL_SPRITES[(levelId - 1) % BALL_SPRITES.l
 
 const ORB_SPRITE = '/assets/kenney/world3/orb.png';
 
+// Game world dimensions (coordinate system)
+const WORLD_WIDTH = 480;
+const WORLD_HEIGHT = 900;
+
 const NeonRush = ({ levelId }) => {
   const { completeLevel, failLevel, setShowPauseMenu, showPauseMenu, playSound } = useGameState();
   const levelData = WORLD3_LEVELS.find(l => l.id === levelId);
   const { trail, orbs, barriers, finishPos, score, speed, countdown } = useSnakeLogic(levelData, completeLevel, failLevel, playSound, showPauseMenu);
+
+  // Track container size for scaling
+  const containerRef = useRef(null);
+  const [scale, setScale] = useState(1);
+
+  useEffect(() => {
+    const updateScale = () => {
+      if (containerRef.current) {
+        const { clientWidth, clientHeight } = containerRef.current;
+        const scaleX = clientWidth / WORLD_WIDTH;
+        const scaleY = clientHeight / WORLD_HEIGHT;
+        setScale(Math.min(scaleX, scaleY));
+      }
+    };
+    updateScale();
+    window.addEventListener('resize', updateScale);
+    return () => window.removeEventListener('resize', updateScale);
+  }, []);
+
+  // Cache player sprite for this level
+  const playerSprite = getPlayerSprite(levelId);
 
   return (
     <div
@@ -49,6 +74,7 @@ const NeonRush = ({ levelId }) => {
       </div>
       {/* Game area container */}
       <div
+        ref={containerRef}
         style={{
           position: 'absolute',
           top: 70,
@@ -56,9 +82,20 @@ const NeonRush = ({ levelId }) => {
           right: 0,
           bottom: 60,
           overflow: 'hidden',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
         }}
       >
-        <div className="relative w-full h-full">
+        <div
+          style={{
+            position: 'relative',
+            width: WORLD_WIDTH,
+            height: WORLD_HEIGHT,
+            transform: `scale(${scale})`,
+            transformOrigin: 'center center',
+          }}
+        >
           {barriers.map((barrier, i) => (
           <div key={`barrier-${i}`} className="absolute" style={{ left: barrier.x, top: barrier.y, width: barrier.width, height: barrier.height, background: 'var(--w3-primary)', boxShadow: '0 0 20px var(--w3-primary)', border: '2px solid var(--w3-primary)' }} />
         ))}
@@ -75,7 +112,7 @@ const NeonRush = ({ levelId }) => {
         })}
         {trail.length > 0 && (
           <img
-            src={getPlayerSprite(levelId)}
+            src={playerSprite}
             alt="Player"
             className="absolute"
             style={{

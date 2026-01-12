@@ -33,6 +33,9 @@ const SkylineCity = ({ levelId }) => {
 
   const levelData = WORLD2_LEVELS.find(l => l.id === levelId);
 
+  // Cache bunny sprites for this level to avoid recalculating on every render
+  const bunnySprites = getBunnySprites(levelId);
+
   const {
     player,
     platforms,
@@ -173,7 +176,7 @@ const SkylineCity = ({ levelId }) => {
           }}
         >
           <img
-            src={player.vy < -2 ? getBunnySprites(levelId).jump : getBunnySprites(levelId).stand}
+            src={player.vy < -2 ? bunnySprites.jump : bunnySprites.stand}
             alt="Player"
             style={{
               width: '100%',
@@ -197,7 +200,7 @@ const SkylineCity = ({ levelId }) => {
           opacity: 0.6,
         }}
       >
-        Tap to jump • Double-tap for boost • Swipe to move
+        Tap to jump • Tap again at peak for double jump • Swipe to move
       </p>
     </div>
   );
