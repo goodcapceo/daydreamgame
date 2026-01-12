@@ -3,9 +3,17 @@ import { WORLD1_LEVELS } from './levels';
 import { useMazeLogic } from './useMazeLogic';
 import { useGameState } from '../../engine/useGameState';
 import { TILES } from '../../utils/constants';
-import { Pause, Diamond, Clock, Star, DoorOpen } from 'lucide-react';
+import { Pause, Clock } from 'lucide-react';
 
 const TILE_SIZE = 40;
+
+// Kenney UI assets
+const STAR_FILLED = '/assets/kenney/ui/stars/star_filled.png';
+const ARROW_UP = '/assets/kenney/ui/icons/arrow_up.png';
+const ARROW_DOWN = '/assets/kenney/ui/icons/arrow_down.png';
+const ARROW_LEFT = '/assets/kenney/ui/icons/arrow_left.png';
+const ARROW_RIGHT = '/assets/kenney/ui/icons/arrow_right.png';
+const FLAG_ICON = '/assets/kenney/ui/icons/flagGreen1.png';
 
 // Kenney gem sprites
 const GEM_SPRITES = [
@@ -17,8 +25,17 @@ const GEM_SPRITES = [
 const PLAYER_SPRITE = '/assets/kenney/world1/player.png';
 const PLAYER_FACE = '/assets/kenney/world1/face.png';
 
+// Kenney monster sprites
+const MONSTER_SPRITES = [
+  '/assets/kenney/world1/monsters/monster_red.png',
+  '/assets/kenney/world1/monsters/monster_dark.png',
+  '/assets/kenney/world1/monsters/monster_blue.png',
+  '/assets/kenney/world1/monsters/monster_green.png',
+  '/assets/kenney/world1/monsters/monster_shadow.png',
+];
+
 const CrystalCaverns = ({ levelId }) => {
-  const { completeLevel, failLevel, setShowPauseMenu, playSound } = useGameState();
+  const { completeLevel, failLevel, setShowPauseMenu, showPauseMenu, playSound } = useGameState();
 
   const levelData = WORLD1_LEVELS.find(l => l.id === levelId);
 
@@ -31,7 +48,8 @@ const CrystalCaverns = ({ levelId }) => {
     mood,
     trail,
     grid,
-  } = useMazeLogic(levelData, completeLevel, failLevel, playSound);
+    movePlayer,
+  } = useMazeLogic(levelData, completeLevel, failLevel, playSound, showPauseMenu);
 
   return (
     <div
@@ -52,13 +70,13 @@ const CrystalCaverns = ({ levelId }) => {
 
         <div className="glass-panel flex gap-4 px-4 py-2 items-center">
           <span className="flex items-center gap-1 text-body">
-            <Diamond size={16} color="var(--w1-accent)" /> {crystals.length}
+            <img src={GEM_SPRITES[0]} alt="Gems" style={{ width: 18, height: 18, imageRendering: 'pixelated' }} /> {crystals.length}
           </span>
           <span className="flex items-center gap-1 text-body">
             <Clock size={16} color="var(--text-light)" /> {timeRemaining}s
           </span>
           <span className="flex items-center gap-1 text-body">
-            <Star size={16} fill="#FFD700" color="#FFD700" /> {score}
+            <img src={STAR_FILLED} alt="Score" style={{ width: 18, height: 18, imageRendering: 'pixelated' }} /> {score}
           </span>
         </div>
 
@@ -111,7 +129,7 @@ const CrystalCaverns = ({ levelId }) => {
               >
                 {cell === TILES.EXIT && (
                   <div className="absolute-fill flex-center">
-                    <DoorOpen size={24} color="var(--w1-accent)" />
+                    <img src={FLAG_ICON} alt="Exit" style={{ width: 28, height: 28, imageRendering: 'pixelated' }} />
                   </div>
                 )}
               </div>
@@ -136,44 +154,30 @@ const CrystalCaverns = ({ levelId }) => {
             />
           ))}
 
-          {/* Render Hazards (shadow monsters) */}
+          {/* Render Hazards (Kenney monsters) */}
           {hazards.map((hazard, index) => (
             <div
               key={`hazard-${index}`}
-              className="absolute anim-float"
+              className="absolute"
               style={{
-                left: hazard.currentX * TILE_SIZE,
-                top: hazard.currentY * TILE_SIZE,
-                width: TILE_SIZE,
-                height: TILE_SIZE,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                left: hazard.currentX * TILE_SIZE + TILE_SIZE / 2,
+                top: hazard.currentY * TILE_SIZE + TILE_SIZE / 2,
+                transform: 'translate(-50%, -50%)',
                 transition: 'left 200ms ease, top 200ms ease',
+                zIndex: 'var(--z-game-entities)',
               }}
             >
-              {/* Ghost/Monster shape */}
-              <div
+              <img
+                src={MONSTER_SPRITES[index % MONSTER_SPRITES.length]}
+                alt="Monster"
+                className="anim-float"
                 style={{
-                  width: 32,
-                  height: 36,
-                  background: 'linear-gradient(180deg, #2d1b4e 0%, #1a0a2e 100%)',
-                  borderRadius: '50% 50% 30% 30% / 60% 60% 40% 40%',
-                  position: 'relative',
-                  boxShadow: '0 0 15px rgba(100, 50, 150, 0.6), inset 0 -8px 12px rgba(0, 0, 0, 0.4)',
-                  animation: 'pulse 1.5s ease-in-out infinite',
+                  width: 48,
+                  height: 48,
+                  imageRendering: 'pixelated',
+                  filter: 'drop-shadow(0 0 8px rgba(255, 0, 100, 0.5))',
                 }}
-              >
-                {/* Eyes */}
-                <div style={{ position: 'absolute', top: '30%', left: '20%', width: 8, height: 10, background: '#ff4444', borderRadius: '50%', boxShadow: '0 0 6px #ff4444' }} />
-                <div style={{ position: 'absolute', top: '30%', right: '20%', width: 8, height: 10, background: '#ff4444', borderRadius: '50%', boxShadow: '0 0 6px #ff4444' }} />
-                {/* Wavy bottom edge */}
-                <div style={{ position: 'absolute', bottom: -4, left: 0, right: 0, height: 8, display: 'flex', justifyContent: 'space-around' }}>
-                  <div style={{ width: 8, height: 8, background: '#1a0a2e', borderRadius: '0 0 50% 50%' }} />
-                  <div style={{ width: 8, height: 8, background: '#1a0a2e', borderRadius: '0 0 50% 50%' }} />
-                  <div style={{ width: 8, height: 8, background: '#1a0a2e', borderRadius: '0 0 50% 50%' }} />
-                </div>
-              </div>
+              />
             </div>
           ))}
 
@@ -239,12 +243,67 @@ const CrystalCaverns = ({ levelId }) => {
         </div>
       </div>
 
+      {/* D-Pad Controls */}
+      <div
+        className="absolute"
+        style={{
+          bottom: 'calc(env(safe-area-inset-bottom, 0px) + 16px)',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 48px)',
+          gridTemplateRows: 'repeat(3, 48px)',
+          gap: '4px',
+          zIndex: 'var(--z-ui-overlay)',
+        }}
+      >
+        <div />
+        <button
+          className="btn-icon flex-center"
+          onClick={() => movePlayer('UP')}
+          aria-label="Move up"
+        >
+          <img src={ARROW_UP} alt="Up" style={{ width: 28, height: 28, imageRendering: 'pixelated' }} />
+        </button>
+        <div />
+        <button
+          className="btn-icon flex-center"
+          onClick={() => movePlayer('LEFT')}
+          aria-label="Move left"
+        >
+          <img src={ARROW_LEFT} alt="Left" style={{ width: 28, height: 28, imageRendering: 'pixelated' }} />
+        </button>
+        <div />
+        <button
+          className="btn-icon flex-center"
+          onClick={() => movePlayer('RIGHT')}
+          aria-label="Move right"
+        >
+          <img src={ARROW_RIGHT} alt="Right" style={{ width: 28, height: 28, imageRendering: 'pixelated' }} />
+        </button>
+        <div />
+        <button
+          className="btn-icon flex-center"
+          onClick={() => movePlayer('DOWN')}
+          aria-label="Move down"
+        >
+          <img src={ARROW_DOWN} alt="Down" style={{ width: 28, height: 28, imageRendering: 'pixelated' }} />
+        </button>
+        <div />
+      </div>
+
       {/* Instructions */}
       <p
-        className="absolute bottom-0 left-0 right-0 text-small text-center p-4"
-        style={{ color: 'var(--w1-text)', opacity: 0.5 }}
+        className="absolute text-small text-center"
+        style={{
+          bottom: 'calc(env(safe-area-inset-bottom, 0px) + 170px)',
+          left: 0,
+          right: 0,
+          color: 'var(--w1-text)',
+          opacity: 0.5,
+        }}
       >
-        Swipe or use arrow keys to move
+        Tap buttons or swipe to move
       </p>
     </div>
   );

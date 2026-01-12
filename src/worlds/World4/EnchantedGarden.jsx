@@ -2,26 +2,37 @@ import React, { useCallback, useEffect } from 'react';
 import { WORLD4_LEVELS } from './levels';
 import { useMatch3Logic } from './useMatch3Logic';
 import { useGameState } from '../../engine/useGameState';
-import { Pause, Target, Sparkles } from 'lucide-react';
+import { Pause } from 'lucide-react';
 
 const TILE_SIZE = 50;
 const GAP = 4;
 
-// Kenney puzzle tile sprites
+// Kenney UI assets
+const STAR_FILLED = '/assets/kenney/ui/stars/star_filled.png';
+
+// Kenney puzzle tile sprites - expanded with more colors from puzzle-pack-2
 const TILE_SPRITES = {
   pink: '/assets/kenney/world4/tile_pink.png',
   purple: '/assets/kenney/world4/tile_purple.png',
   yellow: '/assets/kenney/world4/tile_yellow.png',
+  blue: '/assets/kenney/world4/tiles/tile_blue.png',
+  green: '/assets/kenney/world4/tiles/tile_green.png',
+  orange: '/assets/kenney/world4/tiles/tile_orange.png',
+  red: '/assets/kenney/world4/tiles/tile_red.png',
 };
 
 const TILE_COLORS = {
   pink: 'var(--w4-flower-pink)',
   purple: 'var(--w4-flower-purple)',
   yellow: 'var(--w4-flower-yellow)',
+  blue: '#74b9ff',
+  green: '#55efc4',
+  orange: '#fdcb6e',
+  red: '#ff7675',
 };
 
 const EnchantedGarden = ({ levelId }) => {
-  const { completeLevel, failLevel, setShowPauseMenu, playSound } = useGameState();
+  const { completeLevel, failLevel, setShowPauseMenu, showPauseMenu, playSound } = useGameState();
   const levelData = WORLD4_LEVELS.find(l => l.id === levelId);
   const {
     grid,
@@ -114,23 +125,30 @@ const EnchantedGarden = ({ levelId }) => {
           <Pause size={22} color="var(--text-light)" />
         </button>
         <div className="glass-panel flex gap-4 px-4 py-2 items-center">
-          <span className="flex items-center gap-1 text-body"><Target size={16} color="var(--w4-accent)" /> {score}</span>
-          <span className="flex items-center gap-1 text-body"><Sparkles size={16} color="var(--w4-flower-yellow)" /> {moves}</span>
+          <span className="flex items-center gap-1 text-body"><img src={STAR_FILLED} alt="Score" style={{ width: 18, height: 18, imageRendering: 'pixelated' }} /> {score}</span>
+          <span className="flex items-center gap-1 text-body"><img src={TILE_SPRITES.yellow} alt="Moves" style={{ width: 18, height: 18, imageRendering: 'pixelated' }} /> {moves}</span>
         </div>
         <div style={{ width: '44px' }} />
       </div>
 
-      {/* Collection objective */}
-      {levelData.objective.type === 'collect' && (
-        <div className="glass-panel flex gap-3 px-4 py-2 mb-4" style={{ marginTop: '70px' }}>
-          {Object.entries(levelData.objective.targets).map(([type, target]) => (
+      {/* Objective display */}
+      <div className="glass-panel flex gap-3 px-4 py-2 mb-4" style={{ marginTop: '70px' }}>
+        {levelData.objective.type === 'collect' ? (
+          // Collection objective - show each tile type progress
+          Object.entries(levelData.objective.targets).map(([type, target]) => (
             <div key={type} className="flex items-center gap-1">
               <img src={TILE_SPRITES[type]} alt={type} style={{ width: 20, height: 20, imageRendering: 'pixelated' }} />
               <span className="text-body text-sm">{collected[type]}/{target}</span>
             </div>
-          ))}
-        </div>
-      )}
+          ))
+        ) : (
+          // Score objective - show target score
+          <div className="flex items-center gap-2">
+            <img src={STAR_FILLED} alt="" style={{ width: 20, height: 20, imageRendering: 'pixelated' }} />
+            <span className="text-body text-sm">Score: {score}/{levelData.objective.target}</span>
+          </div>
+        )}
+      </div>
 
       {/* Game grid */}
       <div
@@ -139,7 +157,7 @@ const EnchantedGarden = ({ levelId }) => {
           display: 'grid',
           gridTemplateColumns: `repeat(${grid[0].length}, ${TILE_SIZE}px)`,
           gap: GAP,
-          marginTop: levelData.objective.type === 'score' ? '80px' : '10px',
+          marginTop: '10px',
           touchAction: 'none', // Prevent scroll while dragging
         }}
       >

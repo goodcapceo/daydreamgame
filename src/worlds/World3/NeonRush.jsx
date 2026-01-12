@@ -2,40 +2,71 @@ import React from 'react';
 import { WORLD3_LEVELS } from './levels';
 import { useSnakeLogic } from './useSnakeLogic';
 import { useGameState } from '../../engine/useGameState';
-import { Pause, Diamond, Zap, Star, Target } from 'lucide-react';
+import { Pause, Zap } from 'lucide-react';
 
-// Kenney rolling ball sprites
-const PLAYER_SPRITE = '/assets/kenney/world3/player.png';
+// Kenney UI assets
+const STAR_FILLED = '/assets/kenney/ui/stars/star_filled.png';
+const STAR_ICON = '/assets/kenney/world3/star.png';
+
+// Kenney rolling ball sprites - multiple colors for variety
+const BALL_SPRITES = [
+  '/assets/kenney/world3/player.png',
+  '/assets/kenney/world3/ball_blue.png',
+  '/assets/kenney/world3/ball_red.png',
+];
+// Select ball based on level ID for variety
+const getPlayerSprite = (levelId) => BALL_SPRITES[(levelId - 1) % BALL_SPRITES.length];
+
 const ORB_SPRITE = '/assets/kenney/world3/orb.png';
 
 const NeonRush = ({ levelId }) => {
-  const { completeLevel, failLevel, setShowPauseMenu, playSound } = useGameState();
+  const { completeLevel, failLevel, setShowPauseMenu, showPauseMenu, playSound } = useGameState();
   const levelData = WORLD3_LEVELS.find(l => l.id === levelId);
-  const { trail, orbs, barriers, finishPos, score, speed, countdown } = useSnakeLogic(levelData, completeLevel, failLevel, playSound);
+  const { trail, orbs, barriers, finishPos, score, speed, countdown } = useSnakeLogic(levelData, completeLevel, failLevel, playSound, showPauseMenu);
 
   return (
-    <div className="absolute-fill" style={{ background: 'var(--w3-bg)', overflow: 'hidden' }}>
+    <div
+      className="absolute-fill"
+      style={{
+        background: 'var(--w3-bg)',
+        overflow: 'hidden',
+        touchAction: 'manipulation',
+        userSelect: 'none',
+        WebkitUserSelect: 'none',
+      }}
+    >
       <div className="absolute-fill" style={{ backgroundImage: 'linear-gradient(0deg, var(--w3-grid) 1px, transparent 1px), linear-gradient(90deg, var(--w3-grid) 1px, transparent 1px)', backgroundSize: '40px 40px', opacity: 0.3 }} />
       <div className="absolute top-0 left-0 right-0 flex-between p-4" style={{ zIndex: 'var(--z-ui-overlay)' }}>
         <button className="btn-icon flex-center" onClick={() => setShowPauseMenu(true)} style={{ width: '44px', height: '44px' }}>
           <Pause size={22} color="var(--text-light)" />
         </button>
         <div className="glass-panel flex gap-4 px-4 py-2 items-center">
-          <span className="flex items-center gap-1 text-body"><Diamond size={16} color="var(--w3-accent)" /> {orbs.length}</span>
+          <span className="flex items-center gap-1 text-body"><img src={ORB_SPRITE} alt="Orbs" style={{ width: 18, height: 18, imageRendering: 'pixelated' }} /> {orbs.length}</span>
           <span className="flex items-center gap-1 text-body"><Zap size={16} color="var(--w3-tertiary)" /> {speed.toFixed(1)}x</span>
-          <span className="flex items-center gap-1 text-body"><Star size={16} fill="#FFD700" color="#FFD700" /> {score}</span>
+          <span className="flex items-center gap-1 text-body"><img src={STAR_FILLED} alt="Score" style={{ width: 18, height: 18, imageRendering: 'pixelated' }} /> {score}</span>
         </div>
         <div style={{ width: '44px' }} />
       </div>
-      <div className="relative w-full h-full">
-        {barriers.map((barrier, i) => (
+      {/* Game area container */}
+      <div
+        style={{
+          position: 'absolute',
+          top: 70,
+          left: 0,
+          right: 0,
+          bottom: 60,
+          overflow: 'hidden',
+        }}
+      >
+        <div className="relative w-full h-full">
+          {barriers.map((barrier, i) => (
           <div key={`barrier-${i}`} className="absolute" style={{ left: barrier.x, top: barrier.y, width: barrier.width, height: barrier.height, background: 'var(--w3-primary)', boxShadow: '0 0 20px var(--w3-primary)', border: '2px solid var(--w3-primary)' }} />
         ))}
         {orbs.map((orb) => (
           <img key={orb.id} src={ORB_SPRITE} alt="Orb" className="absolute anim-pulse" style={{ left: orb.x - 10, top: orb.y - 10, width: 20, height: 20, imageRendering: 'pixelated', filter: 'drop-shadow(0 0 10px var(--w3-accent))' }} />
         ))}
         <div className="absolute anim-glow flex-center" style={{ left: finishPos.x - 25, top: finishPos.y - 25, width: 50, height: 50, borderRadius: '50%', border: '3px solid var(--w3-tertiary)', background: 'rgba(255, 255, 0, 0.1)', boxShadow: '0 0 30px var(--w3-tertiary)' }}>
-          <Target size={28} color="var(--w3-tertiary)" />
+          <img src={STAR_ICON} alt="Finish" style={{ width: 32, height: 32, imageRendering: 'pixelated' }} />
         </div>
         {trail.map((segment, i) => {
           const opacity = 1 - (i / trail.length) * 0.7;
@@ -44,7 +75,7 @@ const NeonRush = ({ levelId }) => {
         })}
         {trail.length > 0 && (
           <img
-            src={PLAYER_SPRITE}
+            src={getPlayerSprite(levelId)}
             alt="Player"
             className="absolute"
             style={{
@@ -57,6 +88,7 @@ const NeonRush = ({ levelId }) => {
             }}
           />
         )}
+        </div>
       </div>
 
       {/* Countdown overlay */}
