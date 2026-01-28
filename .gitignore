@@ -23,3 +23,8 @@ dist-ssr
 *.sln
 *.sw?
 .vercel
+
+# Planning files
+PLAN.md
+NEXT_STEPS_AND_QPLAN.md
+TEST_RESULTS.md
